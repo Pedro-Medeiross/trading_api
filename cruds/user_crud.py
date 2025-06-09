@@ -26,7 +26,7 @@ def get_user_by_email(db: Session, email: str) -> Optional[models_user.User]:
 def create_user(db: Session, user: schemas_user.UserCreate) -> models_user.User:
     db_user = models_user.User(
         complete_name=user.complete_name,
-        username=user.username.lower(),
+        email=user.email.lower(),
         password=crud_security.get_password_hash(user.password),
         is_superuser=user.is_superuser,
         created_at=datetime.now(),
