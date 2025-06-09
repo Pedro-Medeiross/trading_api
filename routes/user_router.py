@@ -56,9 +56,7 @@ async def refresh_access_token(refresh_token: str = Depends(security.oauth2_sche
 @user_router.post("/create", response_model=schemas_user.User)
 async def create_user(user: schemas_user.UserCreate, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)):
     """Cria um novo usuário."""
-    db_user = crud_user.get_user_by_username(db, username=user.username)
-    if current_user.is_superuser == False:
-        raise HTTPException(status_code=403, detail="Você não tem permissão para criar um usuário")
+    db_user = crud_user.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Funcionário com este nome de usuário já existe")
+        raise HTTPException(status_code=400, detail="Funcionário com este email já existe")
     return crud_user.create_user(db=db, user=user)
