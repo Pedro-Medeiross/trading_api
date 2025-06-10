@@ -22,7 +22,7 @@ for model in models:
 
 app = FastAPI()
 
-
+"""
 origins = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
@@ -31,7 +31,11 @@ origins = [
     "http://localhost:34115"
     "http://localhost:5173"
 ]
+"""
 
+origins = [
+    "*"
+]
 
 app.add_middleware(
     CORSMiddleware,
