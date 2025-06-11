@@ -10,11 +10,6 @@ def get_user_by_id(db: Session, user_id: int):
     return db.query(models_user.User).filter(models_user.User.id == user_id).first()
 
 
-def get_user_by_username(db: Session, username: str) -> Optional[models_user.User]:
-    user = db.query(models_user.User).filter(models_user.User.username == username.lower()).first()
-    return user
-
-
 def get_users(db: Session, skip: int = 0, limit: int = 1000000):
     return db.query(models_user.User).offset(skip).limit(limit).all()
 

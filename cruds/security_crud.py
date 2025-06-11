@@ -45,25 +45,19 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def authenticate_user(db: Session, username: str, password: str):
+def authenticate_user(db: Session, email: str, password: str):
     email_regex = r'^[\w\.\+\-]+\@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$|^[\w]+$'
 
     tz = pytz.timezone('America/Sao_Paulo')
     now = datetime.now(tz).replace(microsecond=0)
 
-    if re.match(email_regex, username):
-        if '@' in username:
-            user = crud_user.get_user_by_email(db=db, email=username)
+    if re.match(email_regex, email):
+        if '@' in email:
+            user = crud_user.get_user_by_email(db=db, email=email)
             if user and verify_password(password, user.password):
                 return user
             else:
                 raise HTTPException(status_code=400, detail="E-mail ou senha incorretos")
-        else:
-            user = crud_user.get_user_by_username(db, username)
-            if user and verify_password(password, user.password):
-                return user
-            else:
-                raise HTTPException(status_code=400, detail="Nome de usuário ou senha incorretos")
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -85,13 +79,13 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
-        token_data = schemas_token.TokenData(username=username)
+        token_data = schemas_token.TokenData(email=email)
     except InvalidTokenError:
         raise credentials_exception
-    user = crud_user.get_user_by_username(db, username=token_data.username)
+    user = crud_user.get_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception
     return user
@@ -122,10 +116,10 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
 def verify_refresh_token(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        email: str = payload.get("sub")
+        if email is None:
             raise HTTPException(status_code=401, detail="Refresh token inválido")
-        return username
+        return email
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Refresh token expirado")
     except jwt.JWTError:
