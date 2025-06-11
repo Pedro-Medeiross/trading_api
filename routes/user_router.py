@@ -28,15 +28,15 @@ async def read_users_me(current_user: schemas_user.User = Depends(security.get_c
 @user_router.post("/login", response_model=schemas_token.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Loga o usuário e retorna um token JWT e refresh token."""
-    user = security.authenticate_user(db, form_data.username, form_data.password)
+    user = security.authenticate_user(db, form_data.email, form_data.password)
     if user:
         access_token_expires = timedelta(hours=12)
         access_token = security.create_access_token(
-            data={"sub": user.username}, expires_delta=access_token_expires
+            data={"sub": user.email}, expires_delta=access_token_expires
         )
         refresh_token_expires = timedelta(days=30)
         refresh_token = security.create_refresh_token(
-            data={"sub": user.username}, expires_delta=refresh_token_expires
+            data={"sub": user.email}, expires_delta=refresh_token_expires
         )
         crud_user.user_last_login(db, user.id)
         return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
