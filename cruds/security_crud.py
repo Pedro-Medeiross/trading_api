@@ -45,15 +45,15 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def authenticate_user(db: Session, email: str, password: str):
+def authenticate_user(db: Session, username: str, password: str):
     email_regex = r'^[\w\.\+\-]+\@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$|^[\w]+$'
 
     tz = pytz.timezone('America/Sao_Paulo')
     now = datetime.now(tz).replace(microsecond=0)
 
-    if re.match(email_regex, email):
-        if '@' in email:
-            user = crud_user.get_user_by_email(db=db, email=email)
+    if re.match(email_regex, username):
+        if '@' in username:
+            user = crud_user.get_user_by_email(db=db, email=username)
             if user and verify_password(password, user.password):
                 return user
             else:
