@@ -25,7 +25,7 @@ async def read_bot_options(current_user: schemas_token.Token = Depends(security.
     Retorna as opções do bot para o usuário logado através do token JWT.
     Se as opções não existirem, retorna um erro 404.
     """
-    bot_options = crud_bot_options.get_bot_options_by_user_id(db, current_user.user_id)
+    bot_options = crud_bot_options.get_bot_options_by_user_id(db, current_user.id)
     if not bot_options:
         raise HTTPException(status_code=404, detail="Bot options not found")
     return bot_options
