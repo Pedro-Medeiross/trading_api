@@ -36,4 +36,4 @@ async def update_bot_options(bot_options: schemas_bot_options.BotOptionsUpdate, 
     Atualiza as opções do bot para o usuário logado através do token JWT.
     Se as opções não existirem, retorna um erro 404.
     """
-    return crud_bot_options.update_bot_options(db, current_user.user_id, bot_options)
+    return crud_bot_options.update_bot_options(db, current_user.id, bot_options)
