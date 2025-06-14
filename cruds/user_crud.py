@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from models import user as models_user
 from schemas import user as schemas_user
+from cruds import bot_options_crud as crud_bot_options
 from cruds import security_crud as crud_security
 
 def get_user_by_id(db: Session, user_id: int):
@@ -27,7 +28,17 @@ def create_user(db: Session, user: schemas_user.UserCreate) -> models_user.User:
         created_at=datetime.now(),
     )
     db.add(db_user)
-    db.commit()    
+    db.commit()
+    db.refresh(db_user)
+    bot_options = schemas_user.BotOptionsCreate(
+        user_id=db_user.id,
+        bot_status=False,
+        stop_loss=0.0,
+        stop_win=0.0,
+        entry_price=0.0,
+        api_key=None
+    )
+    crud_bot_options.create_bot_options(db, bot_options=bot_options)
     return db_user
 
 def user_last_login(db: Session, user_id: int) -> models_user.User:
