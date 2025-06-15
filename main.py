@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from connection import engine, SessionLocal
 from routes.user_router import user_router
 from routes.bot_options_router import bot_options_router
+from routes.trade_order_info_router import trade_order_info_router
 
 models_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
 
@@ -48,3 +49,4 @@ app.add_middleware(
 
 app.include_router(user_router, prefix='/user', tags=['user'])
 app.include_router(bot_options_router, prefix='/bot-options', tags=['bot-options'])
+app.include_router(trade_order_info_router, prefix='/trade-order-info', tags=['trade-order-info'])
