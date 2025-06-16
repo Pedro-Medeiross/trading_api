@@ -40,7 +40,7 @@ async def update_bot_options(bot_options: schemas_bot_options.BotOptionsUpdate, 
 
 
 @bot_options_router.get("/api-key/{user_id}", response_model=str)
-async def get_api_key(user_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.get_current_user)):
+async def get_api_key(user_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)):
     """
     Retorna a chave da API para o usuário logado através do token JWT.
     Se a chave não existir, retorna um erro 404.
