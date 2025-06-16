@@ -9,6 +9,13 @@ def get_bot_options_by_user_id(db: Session, user_id: int) -> BotOptions:
     return db.query(BotOptions).filter(BotOptions.user_id == user_id).first()
 
 
+def get_api_key_by_user_id(db: Session, user_id: int) -> str:
+    bot_options = get_bot_options_by_user_id(db, user_id)
+    if not bot_options or not bot_options.api_key:
+        raise ValueError("API key not found for the given user ID")
+    return bot_options.api_key
+
+
 def create_bot_options(db: Session, bot_options: schemas_bot_options.BotOptionsCreate) -> BotOptions:
     db_bot_options = models_bot_options.BotOptions(
         user_id=bot_options.user_id,
