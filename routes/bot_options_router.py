@@ -50,3 +50,17 @@ async def get_api_key(user_id: int, db: Session = Depends(get_db), credentials: 
         return api_key
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
+
+
+@bot_options_router.get("/bot-options/{user_id}", response_model=schemas_bot_options.BotOptions)
+async def get_bot_options(user_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)):
+    """
+    Retorna as opções do bot para o usuário logado através do token JWT.
+    Se as opções não existirem, retorna um erro 404.
+    """
+    try:
+        bot_options = crud_bot_options.get_bot_options_by_user_id(db, user_id)
+        return bot_options
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
