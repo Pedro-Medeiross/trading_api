@@ -39,6 +39,24 @@ async def update_bot_options(bot_options: schemas_bot_options.BotOptionsUpdate, 
     return crud_bot_options.update_bot_options(db, current_user.id, bot_options)
 
 
+
+@bot_options_router.put("/bot-options/{user_id}", response_model=schemas_bot_options.BotOptions)
+async def update_bot_options_bot(
+    user_id: int,
+    bot_options: schemas_bot_options.BotOptionsUpdate,
+    db: Session = Depends(get_db),
+    credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)
+):
+    """
+    Atualiza as opções do bot, incluindo a chave da API.
+    Se as opções não existirem, cria novas opções.
+    """
+    try:
+        return crud_bot_options.update_bot_options(db, user_id, bot_options)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
 @bot_options_router.get("/api-key/{user_id}", response_model=str)
 async def get_api_key(user_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)):
     """
