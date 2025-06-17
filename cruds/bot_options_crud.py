@@ -46,6 +46,8 @@ def update_bot_options(db: Session, user_id: int, bot_options: schemas_bot_optio
     if bot_options.api_key is not None:
         hashed_api_key = base64.b64encode(bot_options.api_key.encode()).decode()
         db_bot_options.api_key = hashed_api_key
+    if bot_options.is_demo is not None:
+        db_bot_options.is_demo = bot_options.is_demo
     db.commit()
     db.refresh(db_bot_options)
     return db_bot_options

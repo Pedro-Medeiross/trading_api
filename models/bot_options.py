@@ -11,3 +11,4 @@ class BotOptions(Base):
     stop_win = Column(Integer, default=0)
     entry_price = Column(Integer, default=0)
     api_key = Column(String, nullable=True)
+    is_demo = Column(Boolean, default=False)
