@@ -48,6 +48,10 @@ def update_bot_options(db: Session, user_id: int, bot_options: schemas_bot_optio
         db_bot_options.api_key = hashed_api_key
     if bot_options.is_demo is not None:
         db_bot_options.is_demo = bot_options.is_demo
+    if bot_options.win_value is not None:
+        db_bot_options.win_value = bot_options.win_value
+    if bot_options.loss_value is not None:
+        db_bot_options.loss_value = bot_options.loss_value
     db.commit()
     db.refresh(db_bot_options)
     return db_bot_options

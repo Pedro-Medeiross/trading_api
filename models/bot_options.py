@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, Float
 from connection import Base
 
 class BotOptions(Base):
@@ -12,3 +12,6 @@ class BotOptions(Base):
     entry_price = Column(Integer, default=0)
     api_key = Column(String, nullable=True)
     is_demo = Column(Boolean, default=False)
+    win_value = Column(Float, default=0.0)
+    loss_value = Column(Float, default=0.0)
+    

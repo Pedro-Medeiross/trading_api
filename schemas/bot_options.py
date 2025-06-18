@@ -9,6 +9,8 @@ class BotOptionsBase(BaseModel):
     user_id: Optional[int] = None
     api_key: Optional[str] = None
     is_demo: Optional[bool] = False
+    win_value: Optional[float] = 0.0
+    loss_value: Optional[float] = 0.0
 
 
 class BotOptionsUpdate(BotOptionsBase):
