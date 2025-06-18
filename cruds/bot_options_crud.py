@@ -52,6 +52,11 @@ def update_bot_options(db: Session, user_id: int, bot_options: schemas_bot_optio
         db_bot_options.win_value = bot_options.win_value
     if bot_options.loss_value is not None:
         db_bot_options.loss_value = bot_options.loss_value
+    if bot_options.broker_username is not None:
+        db_bot_options.broker_username = bot_options.broker_username
+    if bot_options.broker_password is not None:
+        hashed_broker_password = base64.b64encode(bot_options.broker_password.encode()).decode()
+        db_bot_options.broker_password = hashed_broker_password
     db.commit()
     db.refresh(db_bot_options)
     return db_bot_options

@@ -14,4 +14,6 @@ class BotOptions(Base):
     is_demo = Column(Boolean, default=False)
     win_value = Column(Float, default=0.0)
     loss_value = Column(Float, default=0.0)
+    broker_username = Column(String, nullable=True)
+    broker_password = Column(String, nullable=True)
     
