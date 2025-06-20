@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 class TradeOrderInfoBase(BaseModel):
     user_id: int
@@ -21,13 +22,13 @@ class TradeOrderInfoCreate(TradeOrderInfoBase):
 
 
 class TradeOrderInfoUpdate(TradeOrderInfoBase):
-    user_id: int | None
-    order_id: str | None
-    symbol: str | None
-    order_type: str | None  # e.g., 'buy', 'sell'
-    quantity: float | None
-    price: float | None
-    status: str | None  # e.g., 'open', 'closed', 'canceled'
+    """
+    Schema for updating an existing trade order.
+    Inherits from TradeOrderInfoBase to include all fields.
+    """
+    order_id: Optional[str] = None  # Optional to allow updates without changing the order ID
+    status: Optional[str] = None  # Optional to allow status updates without changing other fields
+    user_id: Optional[int] = None  # Optional to allow updates without changing the user ID
 
 
 
