@@ -6,6 +6,7 @@ from connection import engine, SessionLocal
 from routes.user_router import user_router
 from routes.bot_options_router import bot_options_router
 from routes.trade_order_info_router import trade_order_info_router
+from routes.user_brokerages_router import user_brokerages_router
 
 models_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
 
@@ -30,12 +31,8 @@ origins = [
     "http://localhost:3000",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
-    "http://localhost:8080/",
-    "http://127.0.0.1:8080/",
-    "http://localhost:34115",
-    "http://localhost:5173",
-    "http://69.62.92.8",
-    "*"
+    "https://api.multitradingob.com/",
+    "https://multitradingob.com/",
 ]
 
 
