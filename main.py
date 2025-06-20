@@ -47,3 +47,4 @@ app.add_middleware(
 app.include_router(user_router, prefix='/user', tags=['user'])
 app.include_router(bot_options_router, prefix='/bot-options', tags=['bot-options'])
 app.include_router(trade_order_info_router, prefix='/trade-order-info', tags=['trade-order-info'])
+app.include_router(user_brokerages_router, prefix='/user-brokerages', tags=['user-brokerages'])
