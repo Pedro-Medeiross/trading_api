@@ -55,19 +55,6 @@ async def update_bot_options_bot(
         return crud_bot_options.update_bot_options(db, user_id, bot_options)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-
-
-@bot_options_router.get("/api-key/{user_id}", response_model=str)
-async def get_api_key(user_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)):
-    """
-    Retorna a chave da API para o usuário logado através do token JWT.
-    Se a chave não existir, retorna um erro 404.
-    """
-    try:
-        api_key = crud_bot_options.get_api_key_by_user_id(db, user_id)
-        return api_key
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
     
 
 

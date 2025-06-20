@@ -10,10 +10,7 @@ class BotOptions(Base):
     stop_loss = Column(Integer, default=0)
     stop_win = Column(Integer, default=0)
     entry_price = Column(Integer, default=0)
-    api_key = Column(String, nullable=True)
     is_demo = Column(Boolean, default=False)
     win_value = Column(Float, default=0.0)
     loss_value = Column(Float, default=0.0)
-    broker_username = Column(String, nullable=True)
-    broker_password = Column(String, nullable=True)
     

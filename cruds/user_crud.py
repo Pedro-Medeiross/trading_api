@@ -37,7 +37,6 @@ def create_user(db: Session, user: schemas_user.UserCreate) -> models_user.User:
         stop_loss=0.0,
         stop_win=0.0,
         entry_price=0.0,
-        api_key=None,
         is_demo=False,
         win_value=0.0,
         loss_value=0.0,
