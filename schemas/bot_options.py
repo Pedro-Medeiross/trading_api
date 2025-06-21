@@ -10,8 +10,8 @@ class BotOptionsBase(BaseModel):
     is_demo: Optional[bool] = False
     win_value: Optional[float] = 0.0
     loss_value: Optional[float] = 0.0
-    broker_username: Optional[str] = None
-    broker_password: Optional[str] = None
+    gale_one: Optional[bool] = True
+    gale_two: Optional[bool] = True
 
 
 class BotOptionsUpdate(BotOptionsBase):

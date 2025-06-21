@@ -14,7 +14,13 @@ def create_bot_options(db: Session, bot_options: schemas_bot_options.BotOptionsC
         bot_status=bot_options.bot_status,
         stop_loss=bot_options.stop_loss,
         stop_win=bot_options.stop_win,
-        entry_price=bot_options.entry_price,    )
+        entry_price=bot_options.entry_price,
+        is_demo=bot_options.is_demo,
+        win_value=bot_options.win_value,
+        loss_value=bot_options.loss_value,
+        gale_one=bot_options.gale_one,
+        gale_two=bot_options.gale_two,    
+        )
     db.add(db_bot_options)
     db.commit()
     db.refresh(db_bot_options)
@@ -39,6 +45,10 @@ def update_bot_options(db: Session, user_id: int, bot_options: schemas_bot_optio
         db_bot_options.win_value = bot_options.win_value
     if bot_options.loss_value is not None:
         db_bot_options.loss_value = bot_options.loss_value
+    if bot_options.gale_one is not None:
+        db_bot_options.gale_one = bot_options.gale_one
+    if bot_options.gale_two is not None:
+        db_bot_options.gale_two = bot_options.gale_two
     db.commit()
     db.refresh(db_bot_options)
     return db_bot_options

@@ -40,6 +40,8 @@ def create_user(db: Session, user: schemas_user.UserCreate) -> models_user.User:
         is_demo=False,
         win_value=0.0,
         loss_value=0.0,
+        gale_one=True,
+        gale_two=True
     )
     crud_bot_options.create_bot_options(db, bot_options=bot_options)
     return db_user

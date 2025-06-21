@@ -13,4 +13,5 @@ class BotOptions(Base):
     is_demo = Column(Boolean, default=False)
     win_value = Column(Float, default=0.0)
     loss_value = Column(Float, default=0.0)
-    
+    gale_one = Column(Boolean, default=True)
+    gale_two = Column(Boolean, default=True)
