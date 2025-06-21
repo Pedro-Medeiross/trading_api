@@ -31,16 +31,28 @@ def create_user_brokerage(db: Session, user_brokerage: user_brokerages_schema.Us
     return db_user_brokerage
 
 
-def update_user_brokerage(db: Session, user_id: int, brokerage_id: int, user_brokerage: user_brokerages_schema.UserBrokeragesUpdate) -> UserBrokeragesModel:
+def update_user_brokerage(
+    db: Session,
+    user_id: int,
+    brokerage_id: int,
+    user_brokerage: user_brokerages_schema.UserBrokeragesUpdate
+) -> UserBrokeragesModel:
     db_user_brokerage = get_user_brokerage(db, user_id, brokerage_id)
+
+    # api_key (já vem codificada do frontend)
     if user_brokerage.api_key is not None:
-        hashed_api_key = base64.b64encode(user_brokerage.api_key.encode()).decode()
-        db_user_brokerage.api_key = hashed_api_key
+        if user_brokerage.api_key != (db_user_brokerage.api_key or ""):
+            db_user_brokerage.api_key = user_brokerage.api_key
+
+    # brokerage_username
     if user_brokerage.brokerage_username is not None:
         db_user_brokerage.brokerage_username = user_brokerage.brokerage_username
+
+    # brokerage_password (também já vem codificada)
     if user_brokerage.brokerage_password is not None:
-        hashed_brokerage_password = base64.b64encode(user_brokerage.brokerage_password.encode()).decode()
-        db_user_brokerage.brokerage_password = hashed_brokerage_password
+        if user_brokerage.brokerage_password != (db_user_brokerage.brokerage_password or ""):
+            db_user_brokerage.brokerage_password = user_brokerage.brokerage_password
+
     db.commit()
     db.refresh(db_user_brokerage)
     return db_user_brokerage
