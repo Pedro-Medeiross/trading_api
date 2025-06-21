@@ -11,6 +11,7 @@ class TradeOrderInfoBase(BaseModel):
     price: float
     status: str  # e.g., 'open', 'closed', 'canceled'
     date_time: datetime  # ISO 8601 format, e.g., '2023-10-01T12:00:00Z'
+    brokerage_id: int  # ID of the brokerage handling the order
 
 
 class TradeOrderInfoCreate(TradeOrderInfoBase):

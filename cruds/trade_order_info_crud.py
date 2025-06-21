@@ -14,7 +14,8 @@ def create_trade_order_info(db: Session, trade_order_info: trade_order_info_sche
         quantity=trade_order_info.quantity,
         side=trade_order_info.side,
         status=trade_order_info.status,
-        date_time=datetime.now(timezone.utc)
+        date_time=datetime.now(timezone.utc),
+        brokerage_id=trade_order_info.brokerage_id,
     )
     db.add(db_trade_order_info)
     db.commit()

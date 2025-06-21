@@ -13,3 +13,4 @@ class TradeOrderInfo(Base):
     price = Column(Float, nullable=False)
     status = Column(String, nullable=False)  # e.g., 'open', 'closed', 'canceled'
     date_time = Column(DateTime, nullable=False)
+    brokerage_id = Column(Integer, nullable=False)
