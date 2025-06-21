@@ -5,13 +5,13 @@ from typing import Optional
 class TradeOrderInfoBase(BaseModel):
     user_id: int
     order_id: str
-    symbol: Optional[str]
-    order_type: Optional[str]  # e.g., 'buy', 'sell'
-    quantity: Optional[float]
-    price: Optional[float]
-    status: Optional[str]  # e.g., 'open', 'closed', 'canceled'
-    date_time: Optional[datetime]  # ISO 8601 format, e.g., '2023-10-01T12:00:00Z'
-    brokerage_id: Optional[int]  # ID of the brokerage handling the order
+    symbol: Optional[str] = None  # e.g., 'BTCUSD', 'ETHUSD'
+    order_type: Optional[str] = None  # e.g., 'buy', 'sell'
+    quantity: Optional[float] = None
+    price: Optional[float] = None
+    status: Optional[str] = None  # e.g., 'open', 'closed', 'canceled'
+    date_time: Optional[datetime] = None  # ISO 8601 format, e.g., '2023-10-01T12:00:00Z'
+    brokerage_id: Optional[int] = None  # ID of the brokerage handling the order
 
 
 class TradeOrderInfoCreate(TradeOrderInfoBase):
