@@ -22,7 +22,7 @@ class TradeOrderInfoCreate(TradeOrderInfoBase):
     pass
 
 
-class TradeOrderInfoUpdate(TradeOrderInfoBase):
+class TradeOrderInfoUpdate(BaseModel):
     """
     Schema for updating an existing trade order.
     Inherits from TradeOrderInfoBase to include all fields.
