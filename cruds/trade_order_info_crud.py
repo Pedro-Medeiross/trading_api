@@ -23,11 +23,12 @@ def create_trade_order_info(db: Session, trade_order_info: trade_order_info_sche
     return db_trade_order_info
 
 
-def get_trade_order_info_by_user_id_today(db: Session, user_id: int) -> list[trade_order_info_model]:
+def get_trade_order_info_by_user_id_today(db: Session, user_id: int, brokerage_id: int) -> list[trade_order_info_model]:
     today = datetime.now(timezone.utc).date()
     return db.query(trade_order_info_model).filter(
         trade_order_info_model.user_id == user_id,
-        trade_order_info_model.date_time >= today
+        trade_order_info_model.date_time >= today,
+        trade_order_info_model.brokerage_id == brokerage_id
     ).all()
 
 

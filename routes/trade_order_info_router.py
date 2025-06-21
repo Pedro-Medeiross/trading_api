@@ -33,8 +33,9 @@ def create_trade_order_info(
     return trade_order_info_crud.create_trade_order_info(db, trade_order_info)
 
 
-@trade_order_info_router.get("/trade_order_info/today", response_model=list[trade_order_info_schema.TradeOrderInfo])
+@trade_order_info_router.get("/trade_order_info/today/{brokerage_id}", response_model=list[trade_order_info_schema.TradeOrderInfo])
 def get_trade_order_info_by_user_id_today(
+    brokerage_id: int,
     db: Session = Depends(get_db),
     current_user: schemas_token.Token = Depends(security.get_current_user)
 ):
@@ -42,7 +43,7 @@ def get_trade_order_info_by_user_id_today(
     Get all trade orders for a user for today.
     Requires authentication.
     """
-    trade_orders = trade_order_info_crud.get_trade_order_info_by_user_id_today(db, current_user.id)
+    trade_orders = trade_order_info_crud.get_trade_order_info_by_user_id_today(db, current_user.id, brokerage_id)
     if not trade_orders:
         raise HTTPException(status_code=404, detail="No trade orders found for today.")
     return trade_orders
