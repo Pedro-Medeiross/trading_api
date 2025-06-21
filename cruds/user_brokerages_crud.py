@@ -34,7 +34,8 @@ def create_user_brokerage(db: Session, user_brokerage: user_brokerages_schema.Us
 def update_user_brokerage(db: Session, user_id: int, brokerage_id: int, user_brokerage: user_brokerages_schema.UserBrokeragesUpdate) -> UserBrokeragesModel:
     db_user_brokerage = get_user_brokerage(db, user_id, brokerage_id)
     if user_brokerage.api_key is not None:
-        db_user_brokerage.api_key = user_brokerage.api_key
+        hashed_api_key = base64.b64encode(user_brokerage.api_key.encode()).decode()
+        db_user_brokerage.api_key = hashed_api_key
     if user_brokerage.brokerage_username is not None:
         db_user_brokerage.brokerage_username = user_brokerage.brokerage_username
     if user_brokerage.brokerage_password is not None:
