@@ -8,6 +8,7 @@ from datetime import timezone
 
 def create_trade_order_info(db: Session, trade_order_info: trade_order_info_schema.TradeOrderInfoCreate) -> trade_order_info_model:
     db_trade_order_info = trade_order_info_model(
+        user_id=trade_order_info.user_id,
         order_id=trade_order_info.order_id,
         symbol=trade_order_info.symbol,
         order_type=trade_order_info.order_type,
