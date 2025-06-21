@@ -30,7 +30,7 @@ def get_user_brokerage(brokerage_id: int, db: Session = Depends(get_db), current
 
 
 @user_brokerages_router.get("/user_brokerages/{brokerage_id}/{user_id}", response_model=user_brokerages_schema.UserBrokerages)
-def get_user_brokerage_bot(brokerage_id: int, user_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.security)):
+def get_user_brokerage_bot(brokerage_id: int, user_id: int, db: Session = Depends(get_db), credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)):
     """
     Get a user brokerage by brokerage ID.
     """

@@ -4,9 +4,13 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from models.trade_order_info import TradeOrderInfo as trade_order_info_model
 from schemas import trade_order_info as trade_order_info_schema
-from datetime import timezone
+import pytz
+from datetime import datetime
+
 
 def create_trade_order_info(db: Session, trade_order_info: trade_order_info_schema.TradeOrderInfoCreate) -> trade_order_info_model:
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+    now_brasilia = datetime.now(brasilia_tz)
     db_trade_order_info = trade_order_info_model(
         user_id=trade_order_info.user_id,
         order_id=trade_order_info.order_id,
@@ -15,7 +19,7 @@ def create_trade_order_info(db: Session, trade_order_info: trade_order_info_sche
         quantity=trade_order_info.quantity,
         price=trade_order_info.price,
         status=trade_order_info.status,
-        date_time=datetime.now(timezone.utc),
+        date_time=now_brasilia,
         brokerage_id=trade_order_info.brokerage_id,
     )
     db.add(db_trade_order_info)
@@ -25,7 +29,9 @@ def create_trade_order_info(db: Session, trade_order_info: trade_order_info_sche
 
 
 def get_trade_order_info_by_user_id_today(db: Session, user_id: int, brokerage_id: int) -> list[trade_order_info_model]:
-    today = datetime.now(timezone.utc).date()
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+    now_brasilia = datetime.now(brasilia_tz)
+    today = now_brasilia.date()
     return db.query(trade_order_info_model).filter(
         trade_order_info_model.user_id == user_id,
         trade_order_info_model.date_time >= today,

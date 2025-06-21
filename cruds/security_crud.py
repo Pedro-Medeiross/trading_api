@@ -47,10 +47,6 @@ def verify_password(plain_password, hashed_password):
 
 def authenticate_user(db: Session, username: str, password: str):
     email_regex = r'^[\w\.\+\-]+\@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]+$|^[\w]+$'
-
-    tz = pytz.timezone('America/Sao_Paulo')
-    now = datetime.now(tz).replace(microsecond=0)
-
     if re.match(email_regex, username):
         if '@' in username:
             user = crud_user.get_user_by_email(db=db, email=username)

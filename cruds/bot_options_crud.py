@@ -31,24 +31,11 @@ def update_bot_options(db: Session, user_id: int, bot_options: schemas_bot_optio
     db_bot_options = get_bot_options_by_user_id(db, user_id)
     if not db_bot_options:
         raise ValueError("Bot options not found for the given user ID")
-    if bot_options.bot_status is not None:
-        db_bot_options.bot_status = bot_options.bot_status
-    if bot_options.stop_loss is not None:
-        db_bot_options.stop_loss = bot_options.stop_loss
-    if bot_options.stop_win is not None:
-        db_bot_options.stop_win = bot_options.stop_win
-    if bot_options.entry_price is not None:
-        db_bot_options.entry_price = bot_options.entry_price
-    if bot_options.is_demo is not None:
-        db_bot_options.is_demo = bot_options.is_demo
-    if bot_options.win_value is not None:
-        db_bot_options.win_value = bot_options.win_value
-    if bot_options.loss_value is not None:
-        db_bot_options.loss_value = bot_options.loss_value
-    if bot_options.gale_one is not None:
-        db_bot_options.gale_one = bot_options.gale_one
-    if bot_options.gale_two is not None:
-        db_bot_options.gale_two = bot_options.gale_two
+    
+    update_data = bot_options.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_bot_options, field, value)
+    
     db.commit()
     db.refresh(db_bot_options)
     return db_bot_options
