@@ -24,7 +24,7 @@ def get_db():
 def create_trade_order_info(
     trade_order_info: trade_order_info_schema.TradeOrderInfoCreate,
     db: Session = Depends(get_db),
-    credentials: HTTPBasicCredentials = Depends(security.get_current_user)
+    credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)
 ):
     """
     Create a new trade order.
@@ -53,7 +53,7 @@ def get_trade_order_info_by_user_id_today(
 def update_trade_order_info_by_id(
     trade_order_info: trade_order_info_schema.TradeOrderInfoUpdate,
     db: Session = Depends(get_db),
-    credentials: HTTPBasicCredentials = Depends(security.get_current_user)
+    credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)
 ):
     """
     Update an existing trade order.
