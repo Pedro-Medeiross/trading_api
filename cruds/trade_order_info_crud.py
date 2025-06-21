@@ -10,9 +10,9 @@ def create_trade_order_info(db: Session, trade_order_info: trade_order_info_sche
     db_trade_order_info = trade_order_info_model(
         order_id=trade_order_info.order_id,
         symbol=trade_order_info.symbol,
-        price=trade_order_info.price,
+        order_type=trade_order_info.order_type,
         quantity=trade_order_info.quantity,
-        side=trade_order_info.side,
+        price=trade_order_info.price,
         status=trade_order_info.status,
         date_time=datetime.now(timezone.utc),
         brokerage_id=trade_order_info.brokerage_id,
