@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from models.trade_order_info import TradeOrderInfo as trade_order_info_model
 from schemas import trade_order_info as trade_order_info_schema
 import pytz
-from datetime import datetime
+from datetime import datetime, time
 
 
 def create_trade_order_info(db: Session, trade_order_info: trade_order_info_schema.TradeOrderInfoCreate) -> trade_order_info_model:
@@ -31,7 +31,6 @@ def get_trade_order_info_by_user_id_today(db: Session, user_id: int, brokerage_i
     now_brasilia = datetime.now(brasilia_tz)
     today = now_brasilia.date()
 
-    # Define início e fim do dia com timezone
     start_of_day = brasilia_tz.localize(datetime.combine(today, time.min))
     end_of_day = brasilia_tz.localize(datetime.combine(today, time.max))
 
