@@ -6,7 +6,7 @@ class BotOptions(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, nullable=False)
-    bot_status = Column(Boolean, default=False)
+    bot_status = Column(Integer, default=False)
     stop_loss = Column(Integer, default=0)
     stop_win = Column(Integer, default=0)
     entry_price = Column(Integer, default=0)
