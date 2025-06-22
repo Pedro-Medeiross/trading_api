@@ -9,8 +9,6 @@ from datetime import datetime
 
 
 def create_trade_order_info(db: Session, trade_order_info: trade_order_info_schema.TradeOrderInfoCreate) -> trade_order_info_model:
-    brasilia_tz = pytz.timezone('America/Sao_Paulo')
-    now_brasilia = datetime.now(brasilia_tz)
     db_trade_order_info = trade_order_info_model(
         user_id=trade_order_info.user_id,
         order_id=trade_order_info.order_id,
@@ -19,7 +17,7 @@ def create_trade_order_info(db: Session, trade_order_info: trade_order_info_sche
         quantity=trade_order_info.quantity,
         price=trade_order_info.price,
         status=trade_order_info.status,
-        date_time=now_brasilia,
+        date_time=trade_order_info.date_time,
         brokerage_id=trade_order_info.brokerage_id,
     )
     db.add(db_trade_order_info)
