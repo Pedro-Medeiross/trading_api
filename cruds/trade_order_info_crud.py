@@ -30,10 +30,16 @@ def get_trade_order_info_by_user_id_today(db: Session, user_id: int, brokerage_i
     brasilia_tz = pytz.timezone('America/Sao_Paulo')
     now_brasilia = datetime.now(brasilia_tz)
     today = now_brasilia.date()
+
+    # Define início e fim do dia com timezone
+    start_of_day = brasilia_tz.localize(datetime.combine(today, time.min))
+    end_of_day = brasilia_tz.localize(datetime.combine(today, time.max))
+
     return db.query(trade_order_info_model).filter(
         trade_order_info_model.user_id == user_id,
-        trade_order_info_model.date_time >= today,
-        trade_order_info_model.brokerage_id == brokerage_id
+        trade_order_info_model.brokerage_id == brokerage_id,
+        trade_order_info_model.date_time >= start_of_day,
+        trade_order_info_model.date_time <= end_of_day
     ).all()
 
 
