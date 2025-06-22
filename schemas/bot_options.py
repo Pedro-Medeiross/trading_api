@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class BotOptionsBase(BaseModel):
-    bot_status: Optional[bool] = None
+    bot_status: Optional[int] = None
     stop_loss: Optional[int] = None
     stop_win: Optional[int] = None
     entry_price: Optional[int] = None
