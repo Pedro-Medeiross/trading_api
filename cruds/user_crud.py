@@ -30,6 +30,7 @@ def create_user(db: Session, user: schemas_user.UserCreate) -> models_user.User:
         password=crud_security.get_password_hash(user.password),
         is_superuser=user.is_superuser,
         created_at= now_brasilia,
+        is_active=False,
     )
     db.add(db_user)
     db.commit()
