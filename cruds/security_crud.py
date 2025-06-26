@@ -164,9 +164,6 @@ def verify_user_activation_to_login(db: Session = Depends(get_db), user_id: int 
     
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    if not user.is_active or not user.activated_at:
-        raise HTTPException(status_code=400, detail="Usuário não ativado")
 
     # Verifica se já se passaram 30 dias desde a ativação
     if now_brasilia > user.activated_at + timedelta(days=30):
