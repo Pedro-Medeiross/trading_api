@@ -126,9 +126,6 @@ def activate_user(db: Session = Depends(get_db), user_id: int = 0):
     brasilia_tz = pytz.timezone('America/Sao_Paulo')
     now_brasilia = datetime.now(brasilia_tz)
     user = crud_user.get_user_by_id(db, user_id)
-
-    if not user.is_superuser:
-        raise HTTPException(status_code=403, detail="Usuário não autorizado")
     
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
@@ -144,9 +141,6 @@ def activate_user(db: Session = Depends(get_db), user_id: int = 0):
 
 def deactivate_user(db: Session = Depends(get_db), user_id: int = 0):
     user = crud_user.get_user_by_id(db, user_id)
-
-    if not user.is_superuser:
-        raise HTTPException(status_code=403, detail="Usuário não autorizado")
     
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")

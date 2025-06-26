@@ -71,12 +71,16 @@ async def create_user(user: schemas_user.UserCreate, db: Session = Depends(get_d
 @user_router.post("/activate/{user_id}", response_model=schemas_user.User, dependencies=[Depends(security.get_current_user)])
 async def activate_user(user_id: int, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     """Ativa um usuário."""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Usuário não autorizado")
     return security.activate_user(db=db, user_id=user_id)
 
 
 @user_router.post("/deactivate/{user_id}", response_model=schemas_user.User, dependencies=[Depends(security.get_current_user)])
 async def deactivate_user(user_id: int, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     """Ativa um usuário."""
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=403, detail="Usuário não autorizado")
     return security.deactivate_user(db=db, user_id=user_id)
 
 
