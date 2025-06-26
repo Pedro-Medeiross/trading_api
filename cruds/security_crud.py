@@ -164,11 +164,12 @@ def verify_user_activation_to_login(db: Session = Depends(get_db), user_id: int 
     
     if user is None:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    # Verifica se já se passaram 30 dias desde a ativação
-    if now_brasilia > user.activated_at + timedelta(days=30):
-        user.is_active = False
-        db.commit()
-        raise HTTPException(status_code=403, detail="Conta expirada. Contate o suporte.")
+    
+    if user.activated_at:
+        # Verifica se já se passaram 30 dias desde a ativação
+        if now_brasilia > user.activated_at + timedelta(days=30):
+            user.is_active = False
+            db.commit()
+            raise HTTPException(status_code=403, detail="Conta expirada. Contate o suporte.")
 
     return user
