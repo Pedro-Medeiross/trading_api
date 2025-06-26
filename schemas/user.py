@@ -21,6 +21,8 @@ class User(UserBase):
     id: int
     last_login: Optional[datetime]
     is_superuser: Optional[bool] = False
+    is_active: Optional[bool] = False
+    activated_at: Optional[datetime]
 
     class Config:
         from_attributes = True

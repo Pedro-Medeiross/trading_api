@@ -9,8 +9,10 @@ class User(Base):
     email = Column(String(100), unique=True, index=True)
     password = Column(String(150))
     is_superuser = Column(Boolean(), default=False)
+    is_active = Column(Boolean(), default=False)
     last_login = Column(DateTime, nullable=True)
     created_at = Column(DateTime, nullable=True)
     updated_at = Column(DateTime, nullable=True)
     deleted_at = Column(DateTime, nullable=True)
+    activated_at = Column(DateTime, nullable=True)
 

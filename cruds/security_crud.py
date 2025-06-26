@@ -120,3 +120,64 @@ def verify_refresh_token(token: str):
         raise HTTPException(status_code=401, detail="Refresh token expirado")
     except jwt.JWTError:
         raise HTTPException(status_code=401, detail="Erro ao verificar o refresh token")
+    
+
+def activate_user(db: Session = Depends(get_db), user_id: int = 0):
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+    now_brasilia = datetime.now(brasilia_tz)
+    user = crud_user.get_user_by_id(db, user_id)
+
+    if not user.is_superuser:
+        raise HTTPException(status_code=403, detail="Usuário não autorizado")
+    
+    if user is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    if user.is_active:
+        raise HTTPException(status_code=400, detail="Usuário já está ativado")
+    
+    user.is_active = True
+    user.activated_at = now_brasilia
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def deactivate_user(db: Session = Depends(get_db), user_id: int = 0):
+    user = crud_user.get_user_by_id(db, user_id)
+
+    if not user.is_superuser:
+        raise HTTPException(status_code=403, detail="Usuário não autorizado")
+    
+    if user is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Usuário já está desativado")
+    
+    user.is_active = False
+    user.activated_at = None
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def verify_user_activation_to_login(db: Session = Depends(get_db), user_id: int = 0):
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+    now_brasilia = datetime.now(brasilia_tz)
+    user = crud_user.get_user_by_id(db, user_id)
+
+    if user.is_superuser:
+        return user
+    
+    if user is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    if not user.is_active or not user.activated_at:
+        raise HTTPException(status_code=400, detail="Usuário não ativado")
+
+    # Verifica se já se passaram 30 dias desde a ativação
+    if now_brasilia > user.activated_at + timedelta(days=30):
+        user.is_active = False
+        db.commit()
+        raise HTTPException(status_code=403, detail="Conta expirada. Contate o suporte.")
+
+    return user

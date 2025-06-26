@@ -34,7 +34,8 @@ origins = [
     "https://api.multitradingob.com",
     "https://multitradingob.com",
     "https://www.multitradingob.com",
-    "https://bot.multitradingob.com"
+    "https://bot.multitradingob.com",
+    "*"
 ]
 
 

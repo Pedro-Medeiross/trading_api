@@ -29,6 +29,7 @@ async def read_users_me(current_user: schemas_user.User = Depends(security.get_c
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db),):
     """Loga o usuário e retorna um token JWT e refresh token."""
     user = security.authenticate_user(db, form_data.username, form_data.password)
+    user = security.verify_user_activation_to_login(db, user.id)
     if user:
         access_token_expires = timedelta(hours=12)
         access_token = security.create_access_token(
@@ -65,3 +66,21 @@ async def create_user(user: schemas_user.UserCreate, db: Session = Depends(get_d
     if db_user:
         raise HTTPException(status_code=400, detail="Funcionário com este email já existe")
     return crud_user.create_user(db=db, user=user)
+
+
+@user_router.post("/activate/{user_id}", response_model=schemas_user.User, dependencies=[Depends(security.get_current_user)])
+async def activate_user(user_id: int, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+    """Ativa um usuário."""
+    return security.activate_user(db=db, user_id=user_id)
+
+
+@user_router.post("/deactivate/{user_id}", response_model=schemas_user.User, dependencies=[Depends(security.get_current_user)])
+async def deactivate_user(user_id: int, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+    """Ativa um usuário."""
+    return security.deactivate_user(db=db, user_id=user_id)
+
+
+@user_router.get("/users", response_model=list[schemas_user.User], dependencies=[Depends(security.get_current_user)])
+async def get_users(db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+    """Retorna todos os usuários."""
+    return crud_user.get_users(db=db)
