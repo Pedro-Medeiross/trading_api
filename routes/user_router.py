@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from schemas import user as schemas_user
 from schemas import token_data as schemas_token
 from sqlalchemy.orm import Session
@@ -8,6 +8,7 @@ from fastapi.security import HTTPBasicCredentials, OAuth2PasswordRequestForm
 from cruds import security_crud as security
 from cruds import user_crud as crud_user
 from datetime import timedelta
+import logging
 
 user_router = APIRouter()
 
@@ -88,3 +89,23 @@ async def deactivate_user(user_id: int, db: Session = Depends(get_db), current_u
 async def get_users(db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     """Retorna todos os usuários."""
     return crud_user.get_users(db=db)
+
+
+@user_router.post("/webhook/kirvano")
+async def webhook_kirvano(request: Request):
+    # Captura o corpo completo da requisição
+    body = await request.json()
+
+    # Captura os parâmetros da URL (query params)
+    query_params = dict(request.query_params)
+
+    # Loga tudo para fins de debug
+    print("🔔 Webhook recebido da Kirvano:")
+    print("➡️ Query Params:", query_params)
+    print("📦 Body:", body)
+
+    # Você pode adicionar logs em arquivo se preferir
+    logging.info("Webhook Kirvano: body=%s, query_params=%s", body, query_params)
+
+    # Retorna um 200 OK para evitar reenvio do webhook
+    return {"received": True}
