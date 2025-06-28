@@ -31,7 +31,7 @@ def create_brokerage(db: Session, brokerage: schemas_brokerages.BrokeragesCreate
     return db_brokerage
 
 
-def update_brokerage(db: Session, brokerage_id: int, brokerage: schemas_brokerages.BrokerageUpdate):
+def update_brokerage(db: Session, brokerage_id: int, brokerage: schemas_brokerages.BrokeragesUpdate):
     db_brokerage = get_brokerage_by_id(db, brokerage_id)
     if not db_brokerage:
         raise HTTPException(status_code=404, detail="Corretora não encontrada")
