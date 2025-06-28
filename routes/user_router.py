@@ -125,7 +125,7 @@ async def webhook_kirvano(request: Request, db: Session = Depends(get_db)):
 
         try:
             if email:
-                activate_user_by_email(db=db, email=email, plan_type=plano)
+                security.activate_user_by_email(db=db, email=email, plan_type=plano)
                 print(f"✅ Usuário ativado: {email} com plano {plano}")
             else:
                 logging.warning("❌ E-mail não encontrado no corpo do webhook.")
