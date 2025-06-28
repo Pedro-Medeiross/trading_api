@@ -9,15 +9,15 @@ class BrokeragesBase(BaseModel):
     brokerage_icon: str
 
 
-class UserCreate(BrokeragesBase):
+class BrokeragesCreate(BrokeragesBase):
     pass
 
 
-class UserUpdate(BrokeragesBase):
+class BrokeragesUpdate(BrokeragesBase):
     pass
 
 
-class User(BrokeragesBase):
+class Brokerages(BrokeragesBase):
     id: int
 
     class Config:
