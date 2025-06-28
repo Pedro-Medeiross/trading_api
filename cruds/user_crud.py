@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 from models import user as models_user
 from schemas import user as schemas_user
 from schemas import bot_options as schemas_bot_options
-from cruds import bot_options_crud as crud_bot_options
 from cruds import security_crud as crud_security
 import pytz
 
@@ -35,20 +34,8 @@ def create_user(db: Session, user: schemas_user.UserCreate) -> models_user.User:
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    bot_options = schemas_bot_options.BotOptionsCreate(
-        user_id=db_user.id,
-        bot_status=False,
-        stop_loss=0,        # inteiro
-        stop_win=0,         # inteiro
-        entry_price=0,      # inteiro
-        is_demo=False,
-        win_value=0.0,
-        loss_value=0.0,
-        gale_one=True,
-        gale_two=True
-    )
-    crud_bot_options.create_bot_options(db, bot_options=bot_options)
     return db_user
+
 
 def user_last_login(db: Session, user_id: int) -> models_user.User:
     brasilia_tz = pytz.timezone('America/Sao_Paulo')
@@ -58,4 +45,16 @@ def user_last_login(db: Session, user_id: int) -> models_user.User:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     db_user.last_login = now_brasilia
     db.commit()
+    return db_user
+
+
+def update_user(db: Session, user_id: int, user: schemas_user.UserUpdate) -> models_user.User:
+    db_user = get_user_by_id(db, user_id)
+
+    update_data = user.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(db_user, field, value)
+    
+    db.commit()
+    db.refresh(db_user)
     return db_user

@@ -15,4 +15,4 @@ class BotOptions(Base):
     loss_value = Column(Float, default=0.0)
     gale_one = Column(Boolean, default=True)
     gale_two = Column(Boolean, default=True)
-    brokerage_id = Column(Integer, nullable=False)
+    brokerage_id = Column(Integer, nullable=True)

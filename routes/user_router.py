@@ -91,6 +91,11 @@ async def get_users(db: Session = Depends(get_db), current_user: schemas_user.Us
     return crud_user.get_users(db=db)
 
 
+@user_router.put("/users", response_model=schemas_user.User, dependencies=[Depends(security.get_current_user)])
+async def update_user(user= schemas_user.UserUpdate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+    crud_user.update_user(db, user_id=current_user.id, user=user)
+
+
 @user_router.post("/webhook/kirvano")
 async def webhook_kirvano(request: Request, db: Session = Depends(get_db)):
     body = await request.json()

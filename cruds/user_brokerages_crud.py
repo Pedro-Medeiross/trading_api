@@ -35,8 +35,7 @@ def update_user_brokerage(
     db: Session,
     user_id: int,
     brokerage_id: int,
-    user_brokerage: user_brokerages_schema.UserBrokeragesUpdate
-) -> UserBrokeragesModel:
+    user_brokerage: user_brokerages_schema.UserBrokeragesUpdate) -> UserBrokeragesModel:
     db_user_brokerage = get_user_brokerage(db, user_id, brokerage_id)
 
     # api_key (já vem codificada do frontend)

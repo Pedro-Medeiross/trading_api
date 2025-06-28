@@ -16,3 +16,4 @@ class User(Base):
     deleted_at = Column(DateTime(timezone=True), nullable=True)
     activated_at = Column(DateTime(timezone=True), nullable=True)
     current_plan = Column(String(100), nullable=True)
+    phone_number = Column(String(100), nullable=True)

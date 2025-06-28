@@ -4,8 +4,12 @@ from models import bot_options as models_bot_options
 from sqlalchemy.orm import Session
 
 
-def get_bot_options_by_user_id(db: Session, user_id: int) -> BotOptions:
+def get_bot_options_by_user_id(db: Session, user_id: int, brokerage_id: int) -> BotOptions:
     return db.query(BotOptions).filter(BotOptions.user_id == user_id).first()
+
+
+def get_bot_options_by_user_id_and_brokerage_id(db: Session, user_id: int, brokerage_id: int) -> BotOptions:
+    return db.query(BotOptions).filter(BotOptions.user_id == user_id, BotOptions.brokerage_id == brokerage_id).first()
 
 
 def create_bot_options(db: Session, bot_options: schemas_bot_options.BotOptionsCreate) -> BotOptions:
@@ -27,8 +31,8 @@ def create_bot_options(db: Session, bot_options: schemas_bot_options.BotOptionsC
     return db_bot_options
 
 
-def update_bot_options(db: Session, user_id: int, bot_options: schemas_bot_options.BotOptionsUpdate) -> BotOptions:
-    db_bot_options = get_bot_options_by_user_id(db, user_id)
+def update_bot_options(db: Session, user_id: int, brokerage_id:int, bot_options: schemas_bot_options.BotOptionsUpdate) -> BotOptions:
+    db_bot_options = get_bot_options_by_user_id_and_brokerage_id(db, user_id, brokerage_id)
     if not db_bot_options:
         raise ValueError("Bot options not found for the given user ID")
     

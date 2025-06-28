@@ -14,7 +14,7 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(UserBase):
-    pass
+    phone_number: Optional[str] = None
 
 
 class User(UserBase):
