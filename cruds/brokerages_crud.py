@@ -19,7 +19,7 @@ def get_brokerages_by_user_id(db: Session, user_id: int):
     return db.query(models_brokerages.Brokerage).filter(models_brokerages.Brokerage.user_id == user_id).all()
 
 
-def create_brokerage(db: Session, brokerage: schemas_brokerages.BrokerageCreate):
+def create_brokerage(db: Session, brokerage: schemas_brokerages.BrokeragesCreate):
     db_brokerage = models_brokerages.Brokerage(
         brokerage_name=brokerage.brokerage_name,
         brokerage_route=brokerage.brokerage_route,

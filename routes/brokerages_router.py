@@ -27,13 +27,13 @@ async def get_brokerages(db: Session = Depends(get_db), current_user: schemas_us
 
 
 @brokerages_router.post("/brokerages", response_model=schemas_brokerages.Brokerage, dependencies=[Depends(security.get_current_user)])
-async def create_brokerage(brokerage: schemas_brokerages.BrokerageCreate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+async def create_brokerage(brokerage: schemas_brokerages.BrokeragesCreate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     brokerage = crud_brokerages.create_brokerage(db, brokerage)
     return brokerage
 
 
 @brokerages_router.put("/brokerages/{brokerage_id}", response_model=schemas_brokerages.Brokerage, dependencies=[Depends(security.get_current_user)])
-async def update_brokerage(brokerage_id: int, brokerage: schemas_brokerages.BrokerageUpdate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+async def update_brokerage(brokerage_id: int, brokerage: schemas_brokerages.BrokeragesUpdate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     brokerage = crud_brokerages.update_brokerage(db, brokerage_id, brokerage)
     return brokerage
 
