@@ -15,6 +15,7 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserBase):
     phone_number: Optional[str] = None
+    password: Optional[str] = None
 
 
 class User(UserBase):
