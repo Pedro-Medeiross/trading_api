@@ -92,20 +92,44 @@ async def get_users(db: Session = Depends(get_db), current_user: schemas_user.Us
 
 
 @user_router.post("/webhook/kirvano")
-async def webhook_kirvano(request: Request):
-    # Captura o corpo completo da requisição
+async def webhook_kirvano(request: Request, db: Session = Depends(get_db)):
     body = await request.json()
-
-    # Captura os parâmetros da URL (query params)
     query_params = dict(request.query_params)
 
-    # Loga tudo para fins de debug
+    logging.info("Webhook Kirvano: body=%s, query_params=%s", body, query_params)
+
     print("🔔 Webhook recebido da Kirvano:")
     print("➡️ Query Params:", query_params)
     print("📦 Body:", body)
 
-    # Você pode adicionar logs em arquivo se preferir
-    logging.info("Webhook Kirvano: body=%s, query_params=%s", body, query_params)
+    # Verifica se a venda foi aprovada
+    if body.get("status") == "APPROVED":
+        email = body.get("customer", {}).get("email")
+        tipo_pagamento = body.get("type")
 
-    # Retorna um 200 OK para evitar reenvio do webhook
+        # Define plano com base no tipo de pagamento
+        if tipo_pagamento == "ONE_TIME":
+            plano = "diario"
+        elif tipo_pagamento == "RECURRING":
+            charge_freq = body.get("plan", {}).get("charge_frequency", "").lower()
+            if charge_freq == "weekly":
+                plano = "semanal"
+            elif charge_freq == "monthly":
+                plano = "mensal"
+            elif charge_freq == "annually":
+                plano = "anual"
+            else:
+                plano = "mensal"  # padrão de segurança
+        else:
+            plano = "mensal"
+
+        try:
+            if email:
+                activate_user_by_email(db=db, email=email, plan_type=plano)
+                print(f"✅ Usuário ativado: {email} com plano {plano}")
+            else:
+                logging.warning("❌ E-mail não encontrado no corpo do webhook.")
+        except Exception as e:
+            logging.error(f"❌ Erro ao ativar usuário: {e}")
+
     return {"received": True}

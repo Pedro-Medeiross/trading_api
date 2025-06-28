@@ -23,6 +23,7 @@ class User(UserBase):
     is_superuser: Optional[bool] = False
     is_active: Optional[bool] = False
     activated_at: Optional[datetime]
+    current_plan: Optional[str]
 
     class Config:
         from_attributes = True

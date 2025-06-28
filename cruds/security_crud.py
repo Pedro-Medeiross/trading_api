@@ -157,19 +157,41 @@ def deactivate_user(db: Session = Depends(get_db), user_id: int = 0):
 def verify_user_activation_to_login(db: Session = Depends(get_db), user_id: int = 0):
     brasilia_tz = pytz.timezone('America/Sao_Paulo')
     now_brasilia = datetime.now(brasilia_tz)
+
     user = crud_user.get_user_by_id(db, user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
     if user.is_superuser:
         return user
-    
-    if user is None:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    
-    if user.activated_at:
-        # Verifica se já se passaram 30 dias desde a ativação
-        if now_brasilia > user.activated_at + timedelta(days=30):
+
+    if user.activated_at and user.current_plan:
+        plan_days = {
+            'diario': 1,
+            'semanal': 7,
+            'mensal': 30
+        }
+        dias_ativos = plan_days.get(user.current_plan, 0)
+        if dias_ativos > 0 and now_brasilia > user.activated_at + timedelta(days=dias_ativos):
             user.is_active = False
             db.commit()
-            raise HTTPException(status_code=403, detail="Conta expirada. Contate o suporte.")
+            raise HTTPException(status_code=403, detail="Plano expirado. Renove sua assinatura.")
 
+    return user
+
+
+def activate_user_by_email(db: Session, email: str, plan_type: str):
+    brasilia_tz = pytz.timezone('America/Sao_Paulo')
+    now_brasilia = datetime.now(brasilia_tz)
+
+    user = crud_user.get_user_by_email(db, email=email)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    user.is_active = True
+    user.activated_at = now_brasilia
+    user.current_plan = plan_type
+
+    db.commit()
+    db.refresh(user)
     return user
