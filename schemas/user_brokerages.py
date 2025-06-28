@@ -14,7 +14,7 @@ class UserBrokeragesCreate(UserBrokeragesBase):
 class UserBrokeragesUpdate(UserBrokeragesBase):
     pass
 
-class Brokerages(UserBrokeragesBase):
+class UserBrokerages(UserBrokeragesBase):
     id: int
 
     class Config:
