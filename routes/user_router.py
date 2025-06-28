@@ -91,7 +91,7 @@ async def get_users(db: Session = Depends(get_db), current_user: schemas_user.Us
     return crud_user.get_users(db=db)
 
 
-@user_router.get("/webhook/kirvano")
+@user_router.post("/webhook/kirvano")
 async def webhook_kirvano(request: Request):
     # Captura o corpo completo da requisição
     body = await request.json()
