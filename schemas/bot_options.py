@@ -12,6 +12,7 @@ class BotOptionsBase(BaseModel):
     loss_value: Optional[float] = None
     gale_one: Optional[bool] = None
     gale_two: Optional[bool] = None
+    brokerage_id: Optional[int] = None
 
 
 class BotOptionsUpdate(BotOptionsBase):
