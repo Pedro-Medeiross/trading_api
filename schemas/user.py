@@ -24,6 +24,7 @@ class User(UserBase):
     is_active: Optional[bool] = False
     activated_at: Optional[datetime]
     current_plan: Optional[str]
+    phone_number: Optional[str]
 
     class Config:
         from_attributes = True
