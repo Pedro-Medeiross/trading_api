@@ -20,31 +20,31 @@ def get_db():
         db.close()
 
 
-@brokerages_router.get("/brokerages", response_model=list[schemas_brokerages.Brokerage], dependencies=[Depends(security.get_current_user)])
+@brokerages_router.get("/brokerages", response_model=list[schemas_brokerages.Brokerages], dependencies=[Depends(security.get_current_user)])
 async def get_brokerages(db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     brokerages = crud_brokerages.get_brokerages_by_user_id(db, current_user.id)
     return brokerages
 
 
-@brokerages_router.post("/brokerages", response_model=schemas_brokerages.Brokerage, dependencies=[Depends(security.get_current_user)])
-async def create_brokerage(brokerage: schemas_brokerages.BrokeragesCreate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+@brokerages_router.post("/brokerages", response_model=schemas_brokerages.Brokerages, dependencies=[Depends(security.get_current_user)])
+async def create_brokerage(brokerage: schemas_brokerages.BrokerageCreate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     brokerage = crud_brokerages.create_brokerage(db, brokerage)
     return brokerage
 
 
-@brokerages_router.put("/brokerages/{brokerage_id}", response_model=schemas_brokerages.Brokerage, dependencies=[Depends(security.get_current_user)])
-async def update_brokerage(brokerage_id: int, brokerage: schemas_brokerages.BrokeragesUpdate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+@brokerages_router.put("/brokerages/{brokerage_id}", response_model=schemas_brokerages.Brokerages, dependencies=[Depends(security.get_current_user)])
+async def update_brokerage(brokerage_id: int, brokerage: schemas_brokerages.BrokerageUpdate, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     brokerage = crud_brokerages.update_brokerage(db, brokerage_id, brokerage)
     return brokerage
 
 
-@brokerages_router.get("/brokerages/{brokerage_id}", response_model=schemas_brokerages.Brokerage, dependencies=[Depends(security.get_current_user)])
+@brokerages_router.get("/brokerages/{brokerage_id}", response_model=schemas_brokerages.Brokerages, dependencies=[Depends(security.get_current_user)])
 async def get_brokerage_by_id(brokerage_id: int, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     brokerage = crud_brokerages.get_brokerage_by_id(db, brokerage_id)
     return brokerage
 
 
-@brokerages_router.get("/brokerages/{user_id}", response_model=list[schemas_brokerages.Brokerage], dependencies=[Depends(security.get_current_user)])
+@brokerages_router.get("/brokerages/{user_id}", response_model=list[schemas_brokerages.Brokerages], dependencies=[Depends(security.get_current_user)])
 async def get_user_brokerages(user_id: int, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     brokerages = crud_brokerages.get_brokerages_by_user_id(db, user_id)
     return brokerages

@@ -8,19 +8,19 @@ import pytz
 
 
 def get_brokerage_by_id(db: Session, brokerage_id: int):
-    return db.query(models_brokerages.Brokerage).filter(models_brokerages.Brokerage.id == brokerage_id).first()
+    return db.query(models_brokerages.Brokerages).filter(models_brokerages.Brokerages.id == brokerage_id).first()
 
 
 def get_brokerages(db: Session, skip: int = 0, limit: int = 1000000):
-    return db.query(models_brokerages.Brokerage).offset(skip).limit(limit).all()
+    return db.query(models_brokerages.Brokerages).offset(skip).limit(limit).all()
 
 
 def get_brokerages_by_user_id(db: Session, user_id: int):
-    return db.query(models_brokerages.Brokerage).filter(models_brokerages.Brokerage.user_id == user_id).all()
+    return db.query(models_brokerages.Brokerages).filter(models_brokerages.Brokerages.user_id == user_id).all()
 
 
 def create_brokerage(db: Session, brokerage: schemas_brokerages.BrokeragesCreate):
-    db_brokerage = models_brokerages.Brokerage(
+    db_brokerage = models_brokerages.Brokerages(
         brokerage_name=brokerage.brokerage_name,
         brokerage_route=brokerage.brokerage_route,
         brokerage_icon=brokerage.brokerage_icon,

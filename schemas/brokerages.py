@@ -17,7 +17,7 @@ class BrokeragesUpdate(BrokeragesBase):
     pass
 
 
-class Brokerage(BrokeragesBase):
+class Brokerages(BrokeragesBase):
     id: int
 
     class Config:
