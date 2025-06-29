@@ -216,7 +216,7 @@ def update_user(db: Session, user_id: int, user: schemas_user.UserUpdate) -> Use
         update_data = user.dict(exclude_unset=True)
 
         #If old password not matches, don't update
-        if not crud_security.verify_password(plain_password=user.old_password, hashed_password=db_user.password):
+        if user.old_password and user.password and not crud_security.verify_password(plain_password=user.old_password, hashed_password=db_user.password):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Senhas não são iguais"
