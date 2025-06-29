@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Any
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -35,7 +35,7 @@ def get_brokerage_by_id(db: Session, brokerage_id: int) -> Optional[Brokerages]:
         )
 
 
-def get_brokerages(db: Session, skip: int = 0, limit: int = 100) -> List[Brokerages]:
+def get_brokerages(db: Session, skip: int = 0, limit: int = 100) -> list[type[Brokerages]]:
     """
     Retrieve a list of brokerages with pagination.
 

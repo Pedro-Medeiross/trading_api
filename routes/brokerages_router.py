@@ -30,7 +30,7 @@ def get_brokerages_for_current_user(
     Requires JWT authentication.
     """
     try:
-        return crud_brokerages.get_brokerages_by_user_id(db, current_user.id)
+        return crud_brokerages.get_brokerages(db)
     except HTTPException:
         raise
     except Exception as e:
