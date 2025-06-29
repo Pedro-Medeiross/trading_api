@@ -42,6 +42,10 @@ def get_trade_order_info_by_user_id_today(db: Session, user_id: int, brokerage_i
     ).all()
 
 
+def get_trade_order_infos_by_user(db: Session, user_id: int, skip: int = 0, limit: int = 1000000) -> list[trade_order_info_model]:
+    return db.query(trade_order_info_model).offset(skip).limit(limit).all()
+
+
 def update_trade_order_info_by_id(db: Session, trade_order_info: trade_order_info_schema.TradeOrderInfoUpdate) -> Optional[trade_order_info_model]:
     db_trade_order_info = db.query(trade_order_info_model).filter(
         trade_order_info_model.order_id == trade_order_info.order_id,

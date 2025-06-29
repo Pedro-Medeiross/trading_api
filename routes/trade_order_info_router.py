@@ -49,6 +49,14 @@ def get_trade_order_info_by_user_id_today(
     return trade_orders
 
 
+@trade_order_info_router.get("/trade_order_info/all}", response_model=list[trade_order_info_schema.TradeOrderInfo])
+def get_trade_order_infos_by_user_id_today(db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
+    trade_orders = trade_order_info_crud.get_trade_order_infos_by_user(db, current_user.id)
+    if not trade_orders:
+        raise HTTPException(status_code=404, detail="No trade orders found for today.")
+    return trade_orders
+                                           
+
 @trade_order_info_router.put("/trade_order_info/update", response_model=trade_order_info_schema.TradeOrderInfo)
 def update_trade_order_info_by_id(
     trade_order_info: trade_order_info_schema.TradeOrderInfoUpdate,
