@@ -215,16 +215,23 @@ def update_user(db: Session, user_id: int, user: schemas_user.UserUpdate) -> Use
         # Update fields from request data
         update_data = user.dict(exclude_unset=True)
 
-        # Validate password change if any password field is provided
-        if user.old_password or user.password:
+        # Helper function to check if a field has meaningful content
+        def has_content(value):
+            return value is not None and str(value).strip() != ""
+
+        # Validate password change if any password field has content
+        old_password_provided = has_content(user.old_password)
+        new_password_provided = has_content(user.password)
+
+        if old_password_provided or new_password_provided:
             # Both fields must be provided for password change
-            if not user.old_password:
+            if not old_password_provided:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Para alterar a senha, forneça a senha atual no campo old_password"
                 )
 
-            if not user.password:
+            if not new_password_provided:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Para alterar a senha, forneça a nova senha no campo password"
@@ -242,6 +249,10 @@ def update_user(db: Session, user_id: int, user: schemas_user.UserUpdate) -> Use
 
         # Remove old_password from update data as it shouldn't be stored
         update_data.pop('old_password', None)
+
+        # Remove password from update data if it's empty (to prevent clearing the password)
+        if 'password' in update_data and not has_content(update_data['password']):
+            update_data.pop('password', None)
 
         # If email is being updated, check if it's already in use
         if 'email' in update_data and update_data['email'] != db_user.email:
