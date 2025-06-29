@@ -26,7 +26,8 @@ class UserUpdate(BaseModel):
     complete_name: Optional[str] = Field(None, description="User's full name")
     email: Optional[str] = Field(None, description="User's email address")
     phone_number: Optional[str] = Field(None, description="User's phone number")
-    password: Optional[str] = Field(None, description="User's password")
+    old_password: Optional[str] = Field(None, description="User's old password")
+    password: Optional[str] = Field(None, description="User's new password" )
 
 
 class User(UserBase):

@@ -215,6 +215,13 @@ def update_user(db: Session, user_id: int, user: schemas_user.UserUpdate) -> Use
         # Update fields from request data
         update_data = user.dict(exclude_unset=True)
 
+        #If old password not matches, don't update
+        if not crud_security.verify_password(plain_password=user.old_password, hashed_password=db_user.password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Senhas não são iguais"
+            )
+
         # If email is being updated, check if it's already in use
         if 'email' in update_data and update_data['email'] != db_user.email:
             existing_user = get_user_by_email(db, update_data['email'])
