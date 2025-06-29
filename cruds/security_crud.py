@@ -360,6 +360,7 @@ def deactivate_user(db: Session, user_id: int) -> User:
 
         user.is_active = False
         user.activated_at = None
+        user.current_plan = None
 
         db.commit()
         db.refresh(user)
