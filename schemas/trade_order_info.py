@@ -1,23 +1,24 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Literal
 
 class TradeOrderInfoBase(BaseModel):
-    user_id: int
-    order_id: str
-    symbol: Optional[str] = None  # e.g., 'BTCUSD', 'ETHUSD'
-    order_type: Optional[str] = None  # e.g., 'buy', 'sell'
-    quantity: Optional[float] = None
-    price: Optional[float] = None
-    status: Optional[str] = None  # e.g., 'open', 'closed', 'canceled'
-    date_time: Optional[datetime] = None  # ISO 8601 format, e.g., '2023-10-01T12:00:00Z'
-    brokerage_id: Optional[int] = None  # ID of the brokerage handling the order
+    """Base schema for trade order information with common fields."""
+    user_id: int = Field(..., description="ID of the user who placed the order")
+    order_id: str = Field(..., description="Unique order identifier from the brokerage")
+    symbol: Optional[str] = Field(None, description="Trading symbol (e.g., 'BTCUSD', 'ETHUSD')")
+    order_type: Optional[str] = Field(None, description="Type of order (e.g., 'buy', 'sell')")
+    quantity: Optional[float] = Field(None, description="Quantity of the asset being traded")
+    price: Optional[float] = Field(None, description="Price at which the order was executed")
+    status: Optional[str] = Field(None, description="Status of the order (e.g., 'open', 'closed', 'canceled')")
+    date_time: Optional[datetime] = Field(None, description="Date and time when the order was placed")
+    brokerage_id: Optional[int] = Field(None, description="ID of the brokerage handling the order")
 
 
 class TradeOrderInfoCreate(TradeOrderInfoBase):
     """
     Schema for creating a new trade order.
-    Inherits from TradeOrderInfo to ensure all fields are included.
+    Inherits from TradeOrderInfoBase to ensure all required fields are included.
     """
     pass
 
@@ -25,20 +26,25 @@ class TradeOrderInfoCreate(TradeOrderInfoBase):
 class TradeOrderInfoUpdate(BaseModel):
     """
     Schema for updating an existing trade order.
-    Inherits from TradeOrderInfoBase to include all fields.
+    Only includes fields that can be updated.
     """
-    order_id: Optional[str] = None  # Optional to allow updates without changing the order ID
-    status: Optional[str] = None  # Optional to allow status updates without changing other fields
-    user_id: Optional[int] = None  # Optional to allow updates without changing the user ID
-
+    order_id: Optional[str] = Field(None, description="Unique order identifier from the brokerage")
+    status: Optional[str] = Field(None, description="Status of the order (e.g., 'open', 'closed', 'canceled')")
+    user_id: Optional[int] = Field(None, description="ID of the user who placed the order")
+    symbol: Optional[str] = Field(None, description="Trading symbol (e.g., 'BTCUSD', 'ETHUSD')")
+    order_type: Optional[str] = Field(None, description="Type of order (e.g., 'buy', 'sell')")
+    quantity: Optional[float] = Field(None, description="Quantity of the asset being traded")
+    price: Optional[float] = Field(None, description="Price at which the order was executed")
+    date_time: Optional[datetime] = Field(None, description="Date and time when the order was placed")
+    brokerage_id: Optional[int] = Field(None, description="ID of the brokerage handling the order")
 
 
 class TradeOrderInfo(TradeOrderInfoBase):
     """
     Schema for representing a trade order.
-    Inherits from TradeOrderInfoBase to include all fields.
+    Inherits from TradeOrderInfoBase and adds the database ID.
     """
-    id: int
+    id: int = Field(..., description="Unique identifier for the trade order in the database")
 
     class Config:
         from_attributes = True  # Allows compatibility with ORM models like SQLAlchemy

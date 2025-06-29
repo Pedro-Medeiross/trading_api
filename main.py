@@ -1,32 +1,61 @@
 import os
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from connection import engine, SessionLocal
+from connection import engine
+
+# Import Base from models to create all tables
+from models.bot_options import Base as BotOptionsBase
+from models.brokerages import Base as BrokeragesBase
+from models.trade_order_info import Base as TradeOrderInfoBase
+from models.user import Base as UserBase
+from models.user_brokerages import Base as UserBrokeragesBase
+
+# Router imports
 from routes.user_router import user_router
 from routes.bot_options_router import bot_options_router
 from routes.trade_order_info_router import trade_order_info_router
 from routes.user_brokerages_router import user_brokerages_router
 from routes.brokerages_router import brokerages_router
 
-models_folder_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'models')
-
-all_files = os.listdir(models_folder_path)
-
-exclude_files = ['__pycache__', 'base_model.py', '__init__.py', 'trades.py']
-
-models_files = [file for file in all_files if file not in exclude_files]
-
-models = [__import__(f'models.{file[:-3]}', fromlist=['']) for file in models_files]
-
-for model in models:
-    if hasattr(model, 'Base'):
-        if hasattr(model.Base, 'metadata'):
-            model.Base.metadata.create_all(engine)
-
-app = FastAPI()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
+def initialize_database() -> None:
+    """
+    Create all database tables if they don't exist.
+
+    This function uses the Base classes from each model to create
+    the corresponding database tables.
+    """
+    try:
+        # Create tables for all models
+        BotOptionsBase.metadata.create_all(engine)
+        BrokeragesBase.metadata.create_all(engine)
+        TradeOrderInfoBase.metadata.create_all(engine)
+        UserBase.metadata.create_all(engine)
+        UserBrokeragesBase.metadata.create_all(engine)
+
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Error initializing database: {str(e)}")
+
+
+# Initialize the FastAPI application
+app = FastAPI(
+    title="Trading API",
+    description="API for trading system with AI and automations",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+)
+
+# Define allowed origins for CORS
 origins = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
@@ -38,7 +67,7 @@ origins = [
     "https://bot.multitradingob.com",
 ]
 
-
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -47,8 +76,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user_router, prefix='/user', tags=['user'])
-app.include_router(bot_options_router, prefix='/bot-options', tags=['bot-options'])
-app.include_router(trade_order_info_router, prefix='/trade-order-info', tags=['trade-order-info'])
-app.include_router(user_brokerages_router, prefix='/user-brokerages', tags=['user-brokerages'])
-app.include_router(brokerages_router, prefix='/brokerages', tags=['brokerages'])
+# Initialize database
+initialize_database()
+
+# Include routers
+app.include_router(user_router, prefix='/user', tags=['Users'])
+app.include_router(bot_options_router, prefix='/bot-options', tags=['Bot Options'])
+app.include_router(trade_order_info_router, prefix='/trade-order-info', tags=['Trade Orders'])
+app.include_router(user_brokerages_router, prefix='/user-brokerages', tags=['User Brokerages'])
+app.include_router(brokerages_router, prefix='/brokerages', tags=['Brokerages'])
+
+
+@app.get("/", tags=["Health Check"])
+def health_check():
+    """
+    Health check endpoint to verify the API is running.
+
+    Returns:
+        Dict with status information
+    """
+    return {
+        "status": "online",
+        "message": "Trading API is running",
+        "version": "1.0.0"
+    }
