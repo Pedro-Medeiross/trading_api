@@ -312,9 +312,10 @@ def update_user_by_id(
         )
 
 
-@user_router.post("/activate/{user_id}", response_model=schemas_user.User)
+@user_router.post("/activate/{user_id}/{days}", response_model=schemas_user.User)
 def activate_user_by_id(
-    user_id: int, 
+    user_id: int,
+    days: int,
     db: Session = Depends(get_db), 
     current_user: schemas_user.User = Depends(security.get_current_user)
 ):
@@ -323,6 +324,7 @@ def activate_user_by_id(
 
     Args:
         user_id: ID of the user to activate
+        days: Days to activate user
 
     Returns:
         Activated user
@@ -340,7 +342,7 @@ def activate_user_by_id(
                 detail="Acesso restrito a administradores"
             )
 
-        return security.activate_user(db=db, user_id=user_id)
+        return security.activate_user(db=db, user_id=user_id, days=days)
     except HTTPException:
         raise
     except Exception as e:

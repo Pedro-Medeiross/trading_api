@@ -290,13 +290,14 @@ def verify_refresh_token(token: str) -> str:
         raise HTTPException(status_code=401, detail="Erro ao verificar o refresh token")
 
 
-def activate_user(db: Session, user_id: int) -> User:
+def activate_user(db: Session, user_id: int, days: int) -> User:
     """
     Activate a user account.
 
     Args:
         db: Database session
         user_id: User ID
+        days: Days to activate
 
     Returns:
         Updated user object
@@ -314,6 +315,13 @@ def activate_user(db: Session, user_id: int) -> User:
 
         if user.is_active:
             raise HTTPException(status_code=400, detail="Usuário já está ativado")
+
+        if days == 1:
+            user.current_plan = 'diario'
+        elif days == 7:
+            user.current_plan = 'semanal'
+        elif days == 30:
+            user.current_plan = 'mensal'
 
         user.is_active = True
         user.activated_at = now_brasilia
