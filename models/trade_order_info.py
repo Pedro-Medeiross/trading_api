@@ -16,6 +16,7 @@ class TradeOrderInfo(Base):
     status = Column(String, nullable=False, index=True)  # e.g., 'open', 'closed', 'canceled'
     date_time = Column(DateTime(timezone=True), nullable=False, index=True)
     brokerage_id = Column(Integer, ForeignKey("brokerages.id", ondelete="CASCADE"), nullable=False, index=True)
+    pnl = Column(Float, nullable=True)
 
     # Create a composite index for common query patterns
     __table_args__ = (

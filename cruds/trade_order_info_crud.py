@@ -43,6 +43,7 @@ def create_trade_order_info(
             status=trade_order_info.status,
             date_time=trade_order_info.date_time,
             brokerage_id=trade_order_info.brokerage_id,
+            pnl = trade_order_info.pnl,
         )
         db.add(db_trade_order_info)
         db.commit()
@@ -247,6 +248,9 @@ def update_trade_order_info_by_id(
 
         # Update other fields if needed in the future
         # ...
+
+        if trade_order_info.pnl is not None:
+            db_trade_order_info.pnl = trade_order_info.pnl
 
         db.commit()
         db.refresh(db_trade_order_info)

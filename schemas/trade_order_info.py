@@ -13,6 +13,7 @@ class TradeOrderInfoBase(BaseModel):
     status: Optional[str] = Field(None, description="Status of the order (e.g., 'open', 'closed', 'canceled')")
     date_time: Optional[datetime] = Field(None, description="Date and time when the order was placed")
     brokerage_id: Optional[int] = Field(None, description="ID of the brokerage handling the order")
+    pnl: Optional[float] = Field(None, description="Price at which the order was executed")
 
 
 class TradeOrderInfoCreate(TradeOrderInfoBase):
@@ -37,6 +38,7 @@ class TradeOrderInfoUpdate(BaseModel):
     price: Optional[float] = Field(None, description="Price at which the order was executed")
     date_time: Optional[datetime] = Field(None, description="Date and time when the order was placed")
     brokerage_id: Optional[int] = Field(None, description="ID of the brokerage handling the order")
+    pnl: Optional[float] = Field(None, description="Price at which the order was executed")
 
 
 class TradeOrderInfo(TradeOrderInfoBase):
