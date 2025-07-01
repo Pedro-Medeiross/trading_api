@@ -8,6 +8,11 @@ class BrokeragesBase(BaseModel):
     brokerage_name: str = Field(..., description="Name of the brokerage")
     brokerage_route: str = Field(..., description="API route or endpoint for the brokerage")
     brokerage_icon: str = Field(..., description="URL or path to the brokerage's icon")
+    brokerage_login_url: Optional[str] = Field(..., description="URL")
+    brokerage_register_url: str = Field(..., description="URL or path to the brokerage's icon")
+    brokerage_traderoom_url: str = Field(..., description="URL or path to the brokerage's icon")
+    brokerage_deposit_url: str = Field(..., description="URL or path to the brokerage's icon")
+    brokerage_withdraw_url: str = Field(..., description="URL or path to the brokerage's icon")
 
 
 class BrokeragesCreate(BrokeragesBase):

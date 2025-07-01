@@ -10,6 +10,11 @@ class Brokerages(Base):
     brokerage_name = Column(String(250), nullable=False)
     brokerage_route = Column(String(250), nullable=False)
     brokerage_icon = Column(String(250), nullable=False)
+    brokerage_login_url = Column(String, nullable=False)
+    brokerage_register_url = Column(String, nullable=False)
+    brokerage_traderoom_url = Column(String, nullable=False)
+    brokerage_deposit_url = Column(String, nullable=False)
+    brokerage_withdraw_url = Column(String, nullable=False)
 
     # Relationships
     user_brokerages = relationship("UserBrokerages", back_populates="brokerage", cascade="all, delete-orphan")

@@ -105,6 +105,11 @@ def create_brokerage(db: Session, brokerage: schemas_brokerages.BrokeragesCreate
             brokerage_name=brokerage.brokerage_name,
             brokerage_route=brokerage.brokerage_route,
             brokerage_icon=brokerage.brokerage_icon,
+            brokerage_login_url=brokerage.brokerage_login_url,
+            brokerage_register_url=brokerage.brokerage_register_url,
+            brokerage_traderoom_url=brokerage.brokerage_traderoom_url,
+            brokerage_withdraw_url=brokerage.brokerage_withdraw_url,
+            brokerage_deposit_url=brokerage.brokerage_deposit_url,
         )
         db.add(db_brokerage)
         db.commit()
