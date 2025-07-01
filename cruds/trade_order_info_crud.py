@@ -16,8 +16,8 @@ TIMEZONE = pytz.timezone('America/Sao_Paulo')
 
 
 def create_trade_order_info(
-    db: Session, 
-    trade_order_info: schemas_trade_order_info.TradeOrderInfoCreate
+        db: Session,
+        trade_order_info: schemas_trade_order_info.TradeOrderInfoCreate
 ) -> TradeOrderInfo:
     """
     Create a new trade order information record.
@@ -58,9 +58,9 @@ def create_trade_order_info(
 
 
 def get_trade_order_info_by_user_id_today(
-    db: Session, 
-    user_id: int, 
-    brokerage_id: int
+        db: Session,
+        user_id: int,
+        brokerage_id: int
 ) -> List[TradeOrderInfo]:
     """
     Retrieve trade order information for a specific user and brokerage for today.
@@ -94,7 +94,8 @@ def get_trade_order_info_by_user_id_today(
         ).all()
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error retrieving trade orders for user {user_id} and brokerage {brokerage_id}: {str(e)}")
+        logger.error(
+            f"Database error retrieving trade orders for user {user_id} and brokerage {brokerage_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao buscar informações de ordens de negociação"
@@ -102,10 +103,10 @@ def get_trade_order_info_by_user_id_today(
 
 
 def get_trade_order_infos_by_user(
-    db: Session, 
-    user_id: int, 
-    skip: int = 0, 
-    limit: int = 1000
+        db: Session,
+        user_id: int,
+        skip: int = 0,
+        limit: int = 1000
 ) -> List[TradeOrderInfo]:
     """
     Retrieve all trade order information for a specific user with pagination.
@@ -137,10 +138,49 @@ def get_trade_order_infos_by_user(
         )
 
 
+def get_trade_order_infos_by_user_and_brokerage(
+        db: Session,
+        user_id: int,
+        brokerage_id: int,
+        skip: int = 0,
+        limit: int = 1000
+) -> List[TradeOrderInfo]:
+    """
+    Retrieve all trade order information for a specific user with pagination.
+
+    Args:
+        db: Database session
+        user_id: ID of the user
+        user_id: ID of the brokerage
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+
+    Returns:
+        List of TradeOrderInfo objects
+
+    Raises:
+        HTTPException: If a database error occurs
+    """
+    try:
+        return db.query(TradeOrderInfo).filter(
+            TradeOrderInfo.user_id == user_id,
+            TradeOrderInfo.brokerage_id == brokerage_id
+        ).order_by(
+            TradeOrderInfo.date_time.desc()
+        ).offset(skip).limit(limit).all()
+    except SQLAlchemyError as e:
+        db.rollback()
+        logger.error(f"Database error retrieving trade orders for user {user_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao buscar informações de ordens de negociação"
+        )
+
+
 def get_trade_order_info_by_order_id(
-    db: Session, 
-    order_id: str, 
-    user_id: int
+        db: Session,
+        order_id: str,
+        user_id: int
 ) -> Optional[TradeOrderInfo]:
     """
     Retrieve trade order information by order ID and user ID.
@@ -171,8 +211,8 @@ def get_trade_order_info_by_order_id(
 
 
 def update_trade_order_info_by_id(
-    db: Session, 
-    trade_order_info: schemas_trade_order_info.TradeOrderInfoUpdate
+        db: Session,
+        trade_order_info: schemas_trade_order_info.TradeOrderInfoUpdate
 ) -> TradeOrderInfo:
     """
     Update an existing trade order information record.
@@ -190,14 +230,14 @@ def update_trade_order_info_by_id(
     try:
         # Get existing trade order info
         db_trade_order_info = get_trade_order_info_by_order_id(
-            db, 
-            trade_order_info.order_id, 
+            db,
+            trade_order_info.order_id,
             trade_order_info.user_id
         )
 
         if not db_trade_order_info:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Informação de ordem de negociação não encontrada"
             )
 
