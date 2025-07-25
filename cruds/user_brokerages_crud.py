@@ -160,7 +160,8 @@ def update_user_brokerage(
         # Update password if provided and different
         if user_brokerage.brokerage_password is not None:
             if user_brokerage.brokerage_password != (db_user_brokerage.brokerage_password or ""):
-                db_user_brokerage.brokerage_password = user_brokerage.brokerage_password
+                encoded_password = base64.b64encode(user_brokerage.brokerage_password.encode()).decode()
+                db_user_brokerage.brokerage_password = encoded_password
 
         db.commit()
         db.refresh(db_user_brokerage)
