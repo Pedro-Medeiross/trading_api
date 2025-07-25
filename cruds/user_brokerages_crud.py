@@ -157,21 +157,33 @@ def update_user_brokerage(
         if user_brokerage.brokerage_username is not None:
             db_user_brokerage.brokerage_username = user_brokerage.brokerage_username
 
-        # Update password if provided and different
+        # Update password if provided and different (base64 comparison)
         if user_brokerage.brokerage_password is not None:
-            if user_brokerage.brokerage_password != (db_user_brokerage.brokerage_password or ""):
-                encoded_password = base64.b64encode(user_brokerage.brokerage_password.encode()).decode()
+            stored_decoded_password = ""
+            if db_user_brokerage.brokerage_password:
+                try:
+                    stored_decoded_password = base64.b64decode(
+                        db_user_brokerage.brokerage_password
+                    ).decode()
+                except Exception:
+                    stored_decoded_password = ""
+
+            if user_brokerage.brokerage_password != stored_decoded_password:
+                encoded_password = base64.b64encode(
+                    user_brokerage.brokerage_password.encode()
+                ).decode()
                 db_user_brokerage.brokerage_password = encoded_password
 
         db.commit()
         db.refresh(db_user_brokerage)
         return db_user_brokerage
     except HTTPException:
-        # Re-raise HTTP exceptions
         raise
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error updating user brokerage for user {user_id} and brokerage {brokerage_id}: {str(e)}")
+        logger.error(
+            f"Database error updating user brokerage for user {user_id} and brokerage {brokerage_id}: {str(e)}"
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao atualizar corretora do usuário"
