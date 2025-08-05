@@ -126,6 +126,7 @@ def create_user(db: Session, user: schemas_user.UserCreate) -> User:
             is_superuser=user.is_superuser,
             created_at=now_local,
             is_active=False,
+            polarium_registered=False,
         )
 
         db.add(db_user)

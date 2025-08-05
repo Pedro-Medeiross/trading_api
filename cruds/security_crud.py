@@ -48,7 +48,6 @@ PLAN_DURATIONS = {
     'diario': 1,
     'semanal': 7,
     'mensal': 30,
-    'anual': 365
 }
 
 
@@ -374,17 +373,8 @@ def deactivate_user(db: Session, user_id: int) -> User:
 
 def verify_user_activation_to_login(db: Session, user_id: int) -> User:
     """
-    Verify if a user is active and their plan is not expired.
-
-    Args:
-        db: Database session
-        user_id: User ID
-
-    Returns:
-        User object if active and plan not expired
-
-    Raises:
-        HTTPException: If user not found or plan expired
+    Verifica se o usuário está ativo e se seu plano ainda é válido.
+    Desativa a conta automaticamente se o plano tiver expirado.
     """
     try:
         brasilia_tz = pytz.timezone('America/Sao_Paulo')
@@ -392,25 +382,47 @@ def verify_user_activation_to_login(db: Session, user_id: int) -> User:
 
         user = crud_user.get_user_by_id(db, user_id)
         if not user:
+            print("❌ Usuário não encontrado no banco de dados.")
             raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-        # Superusers bypass activation checks
+        print(f"🔍 Verificando ativação do usuário: {user.email} (ID: {user.id})")
+
         if user.is_superuser:
+            print("👑 Usuário é superusuário. Ignorando verificação de plano.")
             return user
 
-        # Check if user has an active plan
         if user.activated_at and user.current_plan:
-            dias_ativos = PLAN_DURATIONS.get(user.current_plan, 0)
+            # Garante que a data de ativação tenha timezone
+            activated_at = user.activated_at
+            if activated_at.tzinfo is None:
+                activated_at = brasilia_tz.localize(activated_at)
+            else:
+                activated_at = activated_at.astimezone(brasilia_tz)
 
-            if dias_ativos > 0 and now_brasilia > user.activated_at + timedelta(days=dias_ativos):
-                user.is_active = False
-                db.commit()
-                raise HTTPException(status_code=403, detail="Plano expirado. Renove sua assinatura.")
+            dias_ativos = PLAN_DURATIONS.get(user.current_plan.lower())
+            if dias_ativos:
+                data_expiracao = activated_at + timedelta(days=dias_ativos)
+                print(f"📅 Ativado em: {activated_at}")
+                print(f"📆 Expira em: {data_expiracao}")
+                print(f"🕓 Agora: {now_brasilia}")
+
+                if now_brasilia > data_expiracao:
+                    user.is_active = False
+                    user.activated_at = None
+                    user.current_plan = None
+                    db.commit()
+                    print("⛔ Plano expirado. Usuário desativado.")
+                    raise HTTPException(status_code=403, detail="Plano expirado. Renove sua assinatura.")
+            else:
+                print(f"⚠️ Plano '{user.current_plan}' não está registrado em PLAN_DURATIONS.")
+        else:
+            print("⚠️ Usuário sem plano ou data de ativação definida.")
 
         return user
+
     except SQLAlchemyError as e:
         db.rollback()
-        logger.error(f"Database error verifying user activation {user_id}: {str(e)}")
+        print(f"❌ Erro de banco ao verificar ativação do usuário: {str(e)}")
         raise HTTPException(status_code=500, detail="Erro ao verificar ativação do usuário")
 
 

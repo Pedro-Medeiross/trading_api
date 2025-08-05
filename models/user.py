@@ -19,6 +19,7 @@ class User(Base):
     activated_at = Column(DateTime(timezone=True), nullable=True)
     current_plan = Column(String(100), nullable=True)
     phone_number = Column(String(100), nullable=True)
+    polarium_registered = Column(Boolean(), default=False, nullable=False)
 
     # Relationships
     brokerages = relationship("UserBrokerages", back_populates="user", cascade="all, delete-orphan")
