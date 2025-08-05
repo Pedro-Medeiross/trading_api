@@ -373,8 +373,8 @@ def deactivate_user(db: Session, user_id: int) -> User:
 
 def verify_user_activation_to_login(db: Session, user_id: int) -> User:
     """
-    Verifica se o usuário está ativo e se seu plano ainda é válido.
-    Desativa a conta automaticamente se o plano tiver expirado.
+    Verifica se o plano do usuário está ativo.
+    Desativa o usuário se o plano estiver expirado, mas permite o login para que ele possa renovar.
     """
     try:
         brasilia_tz = pytz.timezone('America/Sao_Paulo')
@@ -382,17 +382,17 @@ def verify_user_activation_to_login(db: Session, user_id: int) -> User:
 
         user = crud_user.get_user_by_id(db, user_id)
         if not user:
-            print("❌ Usuário não encontrado no banco de dados.")
+            print("❌ Usuário não encontrado.")
             raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
         print(f"🔍 Verificando ativação do usuário: {user.email} (ID: {user.id})")
 
         if user.is_superuser:
-            print("👑 Usuário é superusuário. Ignorando verificação de plano.")
+            print("👑 Superusuário. Acesso irrestrito.")
             return user
 
         if user.activated_at and user.current_plan:
-            # Garante que a data de ativação tenha timezone
+            # Garante timezone na data
             activated_at = user.activated_at
             if activated_at.tzinfo is None:
                 activated_at = brasilia_tz.localize(activated_at)
@@ -407,22 +407,24 @@ def verify_user_activation_to_login(db: Session, user_id: int) -> User:
                 print(f"🕓 Agora: {now_brasilia}")
 
                 if now_brasilia > data_expiracao:
-                    user.is_active = False
-                    user.activated_at = None
-                    user.current_plan = None
-                    db.commit()
-                    print("⛔ Plano expirado. Usuário desativado.")
-                    raise HTTPException(status_code=403, detail="Plano expirado. Renove sua assinatura.")
+                    if user.is_active:
+                        print("⛔ Plano expirado. Marcando usuário como inativo.")
+                        user.is_active = False
+                        user.activated_at = None
+                        user.current_plan = None
+                        db.commit()
+                    else:
+                        print("⚠️ Usuário já está desativado.")
             else:
-                print(f"⚠️ Plano '{user.current_plan}' não está registrado em PLAN_DURATIONS.")
+                print(f"⚠️ Plano '{user.current_plan}' não reconhecido.")
         else:
-            print("⚠️ Usuário sem plano ou data de ativação definida.")
+            print("⚠️ Usuário sem data de ativação ou plano ativo.")
 
         return user
 
     except SQLAlchemyError as e:
         db.rollback()
-        print(f"❌ Erro de banco ao verificar ativação do usuário: {str(e)}")
+        print(f"❌ Erro no banco ao verificar ativação do usuário: {str(e)}")
         raise HTTPException(status_code=500, detail="Erro ao verificar ativação do usuário")
 
 
