@@ -451,3 +451,23 @@ async def webhook_kirvano(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao processar webhook"
         )
+
+
+@user_router.get("/webhook/polarium")
+async def webhook_polarium(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    try:
+        # Extract data from request
+        body = await request.json()
+        query_params = dict(request.query_params)
+
+        logger.info(f"Webhook Kirvano received: body={body}, query_params={query_params}")
+
+    except Exception as e:
+        logger.error(f"Error processing Kirvano webhook: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao processar webhook"
+        )
