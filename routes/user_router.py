@@ -90,26 +90,23 @@ def refresh_access_token(
     """
     Use a refresh token to generate a new access token.
 
-    Args:
-        refresh_token: JWT refresh token
-
     Returns:
-        New access token and token type
-
-    Raises:
-        HTTPException: If refresh token is invalid
+        New access token, refresh token, and token type
     """
     try:
-        # Verify refresh token
         username = security.verify_refresh_token(refresh_token)
 
-        # Generate new access token
         access_token_expires = timedelta(hours=6)
         access_token = security.create_access_token(
             data={"sub": username}, expires_delta=access_token_expires
         )
 
-        return {"access_token": access_token, "token_type": "bearer"}
+        # ✅ Retorna os 3 campos exigidos pelo schemas_token.Token
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+        }
     except HTTPException:
         raise
     except Exception as e:
@@ -463,10 +460,10 @@ async def webhook_polarium(
         body = await request.json()
         query_params = dict(request.query_params)
 
-        logger.info(f"Webhook Kirvano received: body={body}, query_params={query_params}")
+        logger.info(f"Webhook polarium received: body={body}, query_params={query_params}")
 
     except Exception as e:
-        logger.error(f"Error processing Kirvano webhook: {str(e)}")
+        logger.error(f"Error processing polarium webhook: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao processar webhook"
