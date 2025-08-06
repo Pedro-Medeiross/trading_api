@@ -43,6 +43,8 @@ class User(UserBase):
     current_plan: Optional[str] = Field(None, description="User's current subscription plan")
     phone_number: Optional[str] = Field(None, description="User's phone number")
     polarium_registered: Optional[bool] = Field(False, description="Whether the user account is registered")
+    avalon_registered: Optional[bool] = Field(False, description="Whether the user account is registered in Avalon")
+    xofre_registered: Optional[bool] = Field(False, description="Whether the user account is registered in Xofre")
 
     class Config:
         from_attributes = True
