@@ -456,17 +456,62 @@ async def webhook_polarium(
     db: Session = Depends(get_db)
 ):
     try:
+        # Pega dados da URL
         query_params = dict(request.query_params)
-
         logger.info(f"✅ Webhook polarium recebido com sucesso: {query_params}")
 
-        # Aqui você pode processar os dados:
-        # ex: trader_id = query_params.get("trader_id")
+        clickid = query_params.get("clickid", "")
+        trader_id = query_params.get("trader_id")
 
-        return {"message": "Webhook recebido com sucesso"}
+        if not clickid or not trader_id:
+            raise HTTPException(status_code=400, detail="ClickID ou trader_id ausente")
 
+        if not clickid.startswith("uid"):
+            raise HTTPException(status_code=400, detail="ClickID inválido")
+
+        user_id = int(clickid.replace("uid", ""))
+
+        # Atualiza campo no usuário
+        update_schema = schemas_user.UserUpdate(polarium_registered=True)  # ou trader_id=trader_id
+        crud_user.update_user(db=db, user_id=user_id, user=update_schema)
+
+        return {"status": "ok"}
     except Exception as e:
-        logger.error(f"❌ Erro ao processar webhook Polarium: {str(e)}")
+        logger.error(f"Error processing polarium webhook: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao processar webhook"
+        )
+    
+
+@user_router.get("/webhook/avalon")
+async def webhook_avalon(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    try:
+        # Pega dados da URL
+        query_params = dict(request.query_params)
+        logger.info(f"✅ Webhook avalon recebido com sucesso: {query_params}")
+
+        clickid = query_params.get("clickid", "")
+        trader_id = query_params.get("trader_id")
+
+        if not clickid or not trader_id:
+            raise HTTPException(status_code=400, detail="ClickID ou trader_id ausente")
+
+        if not clickid.startswith("uid"):
+            raise HTTPException(status_code=400, detail="ClickID inválido")
+
+        user_id = int(clickid.replace("uid", ""))
+
+        # Atualiza campo no usuário
+        update_schema = schemas_user.UserUpdate(avalon_registered=True)  # ou trader_id=trader_id
+        crud_user.update_user(db=db, user_id=user_id, user=update_schema)
+
+        return {"status": "ok"}
+    except Exception as e:
+        logger.error(f"Error processing avalon webhook: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao processar webhook"

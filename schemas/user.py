@@ -28,6 +28,9 @@ class UserUpdate(BaseModel):
     phone_number: Optional[str] = Field(None, description="User's phone number")
     old_password: Optional[str] = Field(None, description="User's old password")
     password: Optional[str] = Field(None, description="User's new password" )
+    polarium_registered: Optional[bool] = Field(None, description="Whether the user account is registered in Polarium")
+    avalon_registered: Optional[bool] = Field(None, description="Whether the user account is registered in Avalon")
+    xofre_registered: Optional[bool] = Field(None, description="Whether the user account is registered in Xofre")
 
 
 class User(UserBase):
