@@ -535,12 +535,12 @@ async def webhook_xofre(
             raise HTTPException(status_code=400, detail="E-mail não fornecido no webhook")
 
         # Buscar usuário no banco de dados
-        user = get_user_by_email(db, email)
+        user = crud_user.get_user_by_email(db, email)
         if not user:
             raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
         # Atualizar xofre_registered
-        update_user(
+        crud_user.update_user(
             db=db,
             user_id=user.id,
             user=schemas_user.UserUpdate(xofre_registered=True)
