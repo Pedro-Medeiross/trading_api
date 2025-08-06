@@ -518,7 +518,7 @@ async def webhook_avalon(
         )
 
 
-@user_router.get("/webhook/xofre")
+@user_router.post("/webhook/xofre")
 async def webhook_xofre(
     request: Request,
     db: Session = Depends(get_db)
