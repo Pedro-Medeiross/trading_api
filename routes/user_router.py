@@ -524,17 +524,29 @@ async def webhook_xofre(
     db: Session = Depends(get_db)
 ):
     try:
-        # Tenta extrair o body, mesmo que não seja comum em GET
-        try:
-            body = await request.json()
-        except Exception:
-            body = None  # GET normalmente não tem corpo
+        body = await request.json()
 
-        query_params = dict(request.query_params)
+        # Log para depuração
+        logger.info(f"✅ Webhook xofre recebido com sucesso:\nQuery: {dict(request.query_params)}\nBody: {body}")
 
-        logger.info(f"✅ Webhook xofre recebido com sucesso:\nQuery: {query_params}\nBody: {body}")
+        # Extrair e-mail
+        email = body.get("data", {}).get("email")
+        if not email:
+            raise HTTPException(status_code=400, detail="E-mail não fornecido no webhook")
 
-        return {"status": "ok"}
+        # Buscar usuário no banco de dados
+        user = get_user_by_email(db, email)
+        if not user:
+            raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+        # Atualizar xofre_registered
+        update_user(
+            db=db,
+            user_id=user.id,
+            user=schemas_user.UserUpdate(xofre_registered=True)
+        )
+
+        return {"status": "ok", "message": f"xofre_registered atualizado para o usuário {email}"}
 
     except Exception as e:
         logger.error(f"Erro ao processar webhook da xofre: {str(e)}")
