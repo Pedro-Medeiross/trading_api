@@ -456,14 +456,17 @@ async def webhook_polarium(
     db: Session = Depends(get_db)
 ):
     try:
-        # Extract data from request
-        body = await request.json()
         query_params = dict(request.query_params)
 
-        logger.info(f"Webhook polarium received: body={body}, query_params={query_params}")
+        logger.info(f"✅ Webhook polarium recebido com sucesso: {query_params}")
+
+        # Aqui você pode processar os dados:
+        # ex: trader_id = query_params.get("trader_id")
+
+        return {"message": "Webhook recebido com sucesso"}
 
     except Exception as e:
-        logger.error(f"Error processing polarium webhook: {str(e)}")
+        logger.error(f"❌ Erro ao processar webhook Polarium: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao processar webhook"
