@@ -516,3 +516,29 @@ async def webhook_avalon(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao processar webhook"
         )
+
+
+@user_router.get("/webhook/xofre")
+async def webhook_xofre(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    try:
+        # Tenta extrair o body, mesmo que não seja comum em GET
+        try:
+            body = await request.json()
+        except Exception:
+            body = None  # GET normalmente não tem corpo
+
+        query_params = dict(request.query_params)
+
+        logger.info(f"✅ Webhook xofre recebido com sucesso:\nQuery: {query_params}\nBody: {body}")
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        logger.error(f"Erro ao processar webhook da xofre: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao processar webhook"
+        )
