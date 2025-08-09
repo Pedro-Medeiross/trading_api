@@ -13,7 +13,7 @@ site_options_router = APIRouter()
 
 
 @site_options_router.get("/all", response_model=List[schemas_site_options.SiteOptions])
-def get_all_site_options(db: Session = Depends(get_db), skip: int = 0, limit: int = 100, current_user: schemas_user.User = Depends(security.get_current_user)):
+def get_all_site_options(db: Session = Depends(get_db), skip: int = 0, limit: int = 100, credentials: HTTPBasicCredentials = Depends(security.get_basic_credentials)):
     """
     Get all site options.
     """
