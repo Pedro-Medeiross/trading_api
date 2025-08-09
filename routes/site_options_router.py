@@ -7,12 +7,13 @@ from fastapi.security import HTTPBasicCredentials, OAuth2PasswordRequestForm
 from cruds import security_crud as security
 from cruds import site_options_crud as cruds_site_options
 from typing import List, Optional
+from schemas import user as schemas_user
 
 site_options_router = APIRouter()
 
 
 @site_options_router.get("/all", response_model=List[schemas_site_options.SiteOptions])
-def get_all_site_options(db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
+def get_all_site_options(db: Session = Depends(get_db), skip: int = 0, limit: int = 100, current_user: schemas_user.User = Depends(security.get_current_user)):
     """
     Get all site options.
     """
@@ -22,7 +23,7 @@ def get_all_site_options(db: Session = Depends(get_db), skip: int = 0, limit: in
         raise e
 
 @site_options_router.get("/{name}", response_model=schemas_site_options.SiteOptions)
-def get_site_option_by_name(name: str, db: Session = Depends(get_db)):
+def get_site_option_by_name(name: str, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     """
     Get a site option by its name.
     
@@ -42,8 +43,7 @@ def get_site_option_by_name(name: str, db: Session = Depends(get_db)):
     
 
 @site_options_router.put("/{name}", response_model=schemas_site_options.SiteOptions)
-def update_site_option(name: str, value: str, db: Session = Depends(get_db
-)):
+def update_site_option(name: str, value: str, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
     """
     Update a site option by its name.
     
