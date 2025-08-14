@@ -18,6 +18,8 @@ class BotOptions(Base):
     gale_one = Column(Boolean, default=True, nullable=False)
     gale_two = Column(Boolean, default=True, nullable=False)
     brokerage_id = Column(Integer, ForeignKey("brokerages.id", ondelete="SET NULL"), nullable=True, index=True)
+    gale_one_value = Column(Float, default=0.0, nullable=False)
+    gale_two_value = Column(Float, default=0.0, nullable=False)
 
     def __repr__(self):
         """String representation of the BotOptions object."""
