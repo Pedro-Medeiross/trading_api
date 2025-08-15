@@ -43,19 +43,31 @@ def get_site_option_by_name(name: str, db: Session = Depends(get_db), current_us
     
 
 @site_options_router.put("/{name}", response_model=schemas_site_options.SiteOptions)
-def update_site_option(name: str, value: str, db: Session = Depends(get_db), current_user: schemas_user.User = Depends(security.get_current_user)):
+def update_site_option(
+    name: str,
+    value: Optional[str] = Query(None),
+    payload: Optional[dict] = Body(None),
+    db: Session = Depends(get_db),
+    current_user: schemas_user.User = Depends(security.get_current_user),
+):
     """
-    Update a site option by its name.
-    
-    Args:
-        name: The name of the site option.
-        value: The new value for the site option.
-    
-    Returns:
-        The updated site option if successful, raises HTTPException on error.
+    Aceita:
+      - ?value=... (query)
+      - {"key_value": "..."} (body JSON)
+      - {"value": "..."} (body JSON)  # compat
     """
     try:
-        return cruds_site_options.update_site_option(db, name, value)
+        new_value = None
+        if payload:
+            if "key_value" in payload:
+                new_value = str(payload["key_value"])
+            elif "value" in payload:
+                new_value = str(payload["value"])
+        if new_value is None and value is not None:
+            new_value = str(value)
+        if new_value is None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Missing value")
+
+        return cruds_site_options.update_site_option(db, name, new_value)
     except HTTPException as e:
         raise e
-
