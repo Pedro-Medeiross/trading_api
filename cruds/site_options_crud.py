@@ -27,7 +27,8 @@ def update_site_option(db: Session, name: str, value: str) -> schemas_site_optio
         if not site_option:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site option not found")
         
-        site_option.value = value
+        # troque 'value' por 'key_value'
+        site_option.key_value = value
         db.commit()
         db.refresh(site_option)
         return site_option
