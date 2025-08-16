@@ -7,6 +7,7 @@ from fastapi.security import HTTPBasicCredentials, OAuth2PasswordRequestForm
 from cruds import security_crud as security
 from cruds import trade_pairs_crud as crud_trade_pairs
 from schemas import trade_pairs as schemas_trade_pairs
+from typing import List, Optional
 
 
 
@@ -16,12 +17,12 @@ logger = logging.getLogger(__name__)
 trade_pairs_router = APIRouter()
 
 
-@trade_pairs_router.post("/create", response_model=schemas_trade_pairs.TradePair)
+@trade_pairs_router.post("/create", response_model=schemas_trade_pairs.TradePairCreate)
 async def create_trade_pair(trade_pair: schemas_trade_pairs.TradePairCreate, db: Session = Depends(get_db)):
     return await crud_trade_pairs.create_trade_pair(db, trade_pair)
 
 
-@trade_pairs_router.get("/all", response_model=List[schemas_trade_pairs.TradePair])
+@trade_pairs_router.get("/all", response_model=List[schemas_trade_pairs.T])
 async def get_all_trade_pairs(db: Session = Depends(get_db)):
     return await crud_trade_pairs.get_all_trade_pairs(db)
 

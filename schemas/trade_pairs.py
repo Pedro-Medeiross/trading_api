@@ -12,3 +12,10 @@ class TradePairCreate(TradePairBase):
 
 class TradePairUpdate(TradePairBase):
     pass
+
+
+class TradePair(TradePairBase):
+    id: int = Field(..., description="The unique identifier of the trade pair")
+
+    class Config:
+        from_attributes = True
