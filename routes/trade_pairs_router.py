@@ -22,7 +22,7 @@ async def create_trade_pair(trade_pair: schemas_trade_pairs.TradePairCreate, db:
     return await crud_trade_pairs.create_trade_pair(db, trade_pair)
 
 
-@trade_pairs_router.get("/all", response_model=List[schemas_trade_pairs.T])
+@trade_pairs_router.get("/all", response_model=List[schemas_trade_pairs.TradePair])
 async def get_all_trade_pairs(db: Session = Depends(get_db)):
     return await crud_trade_pairs.get_all_trade_pairs(db)
 
