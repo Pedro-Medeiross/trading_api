@@ -18,17 +18,17 @@ trade_pairs_router = APIRouter()
 
 
 @trade_pairs_router.post("/create", response_model=schemas_trade_pairs.TradePairCreate)
-async def create_trade_pair(trade_pair: schemas_trade_pairs.TradePairCreate, db: Session = Depends(get_db)):
+async def create_trade_pair(trade_pair: schemas_trade_pairs.TradePairCreate, db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
     return await crud_trade_pairs.create_trade_pair(db, trade_pair)
 
 
 @trade_pairs_router.get("/all", response_model=List[schemas_trade_pairs.TradePair])
-async def get_all_trade_pairs(db: Session = Depends(get_db)):
+async def get_all_trade_pairs(db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
     return await crud_trade_pairs.get_all_trade_pairs(db)
 
 
 @trade_pairs_router.get("/{trade_pair_id}", response_model=schemas_trade_pairs.TradePair)
-async def get_trade_pair(trade_pair_id: int, db: Session = Depends(get_db)):
+async def get_trade_pair(trade_pair_id: int, db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
     trade_pair = await crud_trade_pairs.get_trade_pair(db, trade_pair_id)
     if not trade_pair:
         raise HTTPException(status_code=404, detail="Trade pair not found")
@@ -36,7 +36,7 @@ async def get_trade_pair(trade_pair_id: int, db: Session = Depends(get_db)):
 
 
 @trade_pairs_router.put("/{trade_pair_id}", response_model=schemas_trade_pairs.TradePair)
-async def update_trade_pair(trade_pair_id: int, trade_pair: schemas_trade_pairs.TradePairUpdate, db: Session = Depends(get_db)):
+async def update_trade_pair(trade_pair_id: int, trade_pair: schemas_trade_pairs.TradePairUpdate, db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
     updated_trade_pair = await crud_trade_pairs.update_trade_pair(db, trade_pair_id, trade_pair)
     if not updated_trade_pair:
         raise HTTPException(status_code=404, detail="Trade pair not found")
@@ -44,7 +44,7 @@ async def update_trade_pair(trade_pair_id: int, trade_pair: schemas_trade_pairs.
 
 
 @trade_pairs_router.delete("/{trade_pair_id}", response_model=schemas_trade_pairs.TradePair)
-async def delete_trade_pair(trade_pair_id: int, db: Session = Depends(get_db)):
+async def delete_trade_pair(trade_pair_id: int, db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
     deleted_trade_pair = await crud_trade_pairs.delete_trade_pair(db, trade_pair_id)
     if not deleted_trade_pair:
         raise HTTPException(status_code=404, detail="Trade pair not found")
@@ -52,7 +52,7 @@ async def delete_trade_pair(trade_pair_id: int, db: Session = Depends(get_db)):
 
 
 @trade_pairs_router.delete("/delete/{trade_pair_id}", response_model=schemas_trade_pairs.TradePair)
-async def delete_trade_pair(trade_pair_id: int, db: Session = Depends(get_db)):
+async def delete_trade_pair(trade_pair_id: int, db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
     deleted_trade_pair = await crud_trade_pairs.delete_trade_pair(db, trade_pair_id)
     if not deleted_trade_pair:
         raise HTTPException(status_code=404, detail="Trade pair not found")
