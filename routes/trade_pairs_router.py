@@ -49,11 +49,3 @@ async def delete_trade_pair(trade_pair_id: int, db: Session = Depends(get_db), c
     if not deleted_trade_pair:
         raise HTTPException(status_code=404, detail="Trade pair not found")
     return deleted_trade_pair
-
-
-@trade_pairs_router.delete("/delete/{trade_pair_id}", response_model=schemas_trade_pairs.TradePair)
-async def delete_trade_pair(trade_pair_id: int, db: Session = Depends(get_db), current_user: schemas_token.Token = Depends(security.get_current_user)):
-    deleted_trade_pair = await crud_trade_pairs.delete_trade_pair(db, trade_pair_id)
-    if not deleted_trade_pair:
-        raise HTTPException(status_code=404, detail="Trade pair not found")
-    return deleted_trade_pair
