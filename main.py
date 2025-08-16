@@ -18,6 +18,7 @@ from routes.trade_order_info_router import trade_order_info_router
 from routes.user_brokerages_router import user_brokerages_router
 from routes.brokerages_router import brokerages_router
 from routes.site_options_router import site_options_router
+from routes.trade_pairs_router import trade_pairs_router
 
 # Configure logging
 logging.basicConfig(
@@ -87,6 +88,7 @@ app.include_router(trade_order_info_router, prefix='/trade-order-info', tags=['T
 app.include_router(user_brokerages_router, prefix='/user-brokerages', tags=['User Brokerages'])
 app.include_router(brokerages_router, prefix='/brokerages', tags=['Brokerages'])
 app.include_router(site_options_router, prefix='/site-options', tags=['Site Options'])
+app.include_router(trade_pairs_router, prefix='/trade-pairs', tags=['Trade Pairs'])
 
 
 @app.get("/", tags=["Health Check"])
