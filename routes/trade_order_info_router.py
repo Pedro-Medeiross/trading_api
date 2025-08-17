@@ -173,3 +173,40 @@ def update_trade_order_info(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao atualizar informação de ordem de negociação"
         )
+
+
+@trade_order_info_router.post("/open", response_model=str)
+def open_trade_offer(
+    open_trade_offer: trade_order_info_schema.OpenTradeOffer,
+    db: Session = Depends(get_db),
+    current_user: schemas_token.Token = Depends(security.get_current_user)
+):
+    """
+    Open a new trade offer.
+
+    Args:
+        open_trade_offer: The trade offer details
+
+    Requires JWT authentication.
+    """
+    print(open_trade_offer)
+    return ("", 201)
+
+
+
+@trade_order_info_router.post("/close", response_model=str)
+def close_trade_offer(
+    close_trade_offer: trade_order_info_schema.CloseTradeOffer,
+    db: Session = Depends(get_db),
+    current_user: schemas_token.Token = Depends(security.get_current_user)
+):
+    """
+    Close an existing trade offer.
+
+    Args:
+        close_trade_offer: The trade offer details
+
+    Requires JWT authentication.
+    """
+    print(close_trade_offer)
+    return ("", 201)

@@ -41,6 +41,25 @@ class TradeOrderInfoUpdate(BaseModel):
     pnl: Optional[float] = Field(None, description="Price at which the order was executed")
 
 
+class OpenTradeOffer(BaseModel):
+    """
+    Schema for representing an open trade offer.
+    """
+    trade_pair: str = Field(..., description="Trading pair for the open offer")
+    timeframe: str = Field(..., description="Timeframe for the open offer (e.g., '1m', '5m', '1h')")
+    direction: str = Field(..., description="Direction of the trade (e.g., 'buy', 'sell')")
+    broker: str = Field(..., description="Broker associated with the trade offer")
+
+
+
+class CloseTradeOffer(BaseModel):
+    """
+    Schema for representing a close trade offer.
+    """
+    result: str = Field(..., description="Result of the close trade offer (e.g., 'success', 'failure')")
+    broker: str = Field(..., description="Broker associated with the trade offer")
+
+
 class TradeOrderInfo(TradeOrderInfoBase):
     """
     Schema for representing a trade order.
