@@ -1,10 +1,10 @@
 import logging
 import os
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import HTTPBasicCredentials
 from sqlalchemy.orm import Session
-from dotenv import load_dotenv
-import requests
 
 from schemas import token_data as schemas_token
 from connection import get_db
@@ -12,143 +12,117 @@ from cruds import security_crud as security
 from cruds import trade_order_info_crud as trade_order_info_crud
 from schemas import trade_order_info as trade_order_info_schema
 
-# -------------------------------------------------------
-# Configurações e inicialização
-# -------------------------------------------------------
-logger = logging.getLogger(__name__)
+# ---- Telegram (python-telegram-bot) ----
+# pip install python-telegram-bot>=21.0
+from telegram import Bot
+from telegram.constants import ParseMode
+from telegram.error import TelegramError
 
-# Carrega variáveis do .env (se já estiverem no ambiente, não há problema)
-load_dotenv()
+logger = logging.getLogger(__name__)
 
 trade_order_info_router = APIRouter()
 
-# Mapa de configuração de bots/canais do Telegram
-TELEGRAM_CONFIG = {
-    "avalon": {
-        "token": os.getenv("AVALON_TOKEN"),
-        "channel": os.getenv("AVALON_CHANNEL"),
-    },
-    "polarium": {
-        "token": os.getenv("POLARIUM_TOKEN"),
-        "channel": os.getenv("POLARIUM_CHANNEL"),
-    },
+# ======================
+# Config / Helpers TG
+# ======================
+
+AVALON_TOKEN = os.getenv("AVALON_TOKEN")
+AVALON_CHANNEL = os.getenv("AVALON_CHANNEL")
+
+POLARIUM_TOKEN = os.getenv("POLARIUM_TOKEN")
+POLARIUM_CHANNEL = os.getenv("POLARIUM_CHANNEL")
+
+# Cria os bots (assíncronos). Se faltar token, mantém None e loga warning.
+BOT_MAP: dict[str, Bot | None] = {
+    "avalon": Bot(AVALON_TOKEN) if AVALON_TOKEN else None,
+    "polarium": Bot(POLARIUM_TOKEN) if POLARIUM_TOKEN else None,
 }
 
-# Validação simples (apenas loga warning se faltando)
-for k, v in TELEGRAM_CONFIG.items():
-    if not v.get("token") or not v.get("channel"):
-        logger.warning(
-            f"[Telegram] Variáveis ausentes para {k}. "
-            f"token={'OK' if v.get('token') else 'FALTA'} "
-            f"channel={'OK' if v.get('channel') else 'FALTA'}"
-        )
+if not AVALON_TOKEN or not AVALON_CHANNEL:
+    logger.warning("[Telegram] Variáveis de ambiente faltando para AVALON (token e/ou channel).")
+if not POLARIUM_TOKEN or not POLARIUM_CHANNEL:
+    logger.warning("[Telegram] Variáveis de ambiente faltando para POLARIUM (token e/ou channel).")
 
-# -------------------------------------------------------
-# Utilitários de envio Telegram
-# -------------------------------------------------------
-def _send_telegram_message(token: str, chat_id: str, text: str, parse_mode: str = "HTML") -> None:
-    """
-    Envia mensagem para um canal/grupo do Telegram via Bot API.
-    Requer que o bot seja admin do canal/grupo.
-    """
-    if not token or not chat_id:
-        logger.error("[Telegram] Token ou chat_id ausentes.")
-        return
+CHANNEL_MAP: dict[str, str | int | None] = {
+    # Aceita -100... como int/str ou @username como str
+    "avalon": AVALON_CHANNEL,
+    "polarium": POLARIUM_CHANNEL,
+}
 
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": parse_mode,
-        "disable_web_page_preview": True,
-    }
-    try:
-        r = requests.post(url, data=payload, timeout=10)
-        if r.status_code != 200:
-            logger.error(f"[Telegram] Falha ao enviar (status {r.status_code}): {r.text}")
-    except Exception as e:
-        logger.exception(f"[Telegram] Exceção ao enviar mensagem: {e}")
+def _parse_chat_id(raw: str | None) -> str | int | None:
+    """Converte '-100123...' em int quando aplicável; mantém '@canal' como str."""
+    if raw is None:
+        return None
+    s = str(raw).strip()
+    if s.lstrip("-").isdigit():
+        try:
+            return int(s)
+        except ValueError:
+            return s
+    return s  # pode ser @username
 
-def _resolve_brokers(broker_raw: str) -> list[str]:
+def _resolve_brokers(broker_raw: str) -> List[str]:
     """
-    Normaliza o campo 'broker' para uma lista com 'avalon', 'polarium' ou ambos.
-    Aceita formatos como: "Avalon", "Polarium", "Avalon e Polarium", "Avalon, Polarium", etc.
+    Retorna lista com 'avalon', 'polarium' ou ambos, aceitando:
+    'Avalon', 'Polarium', 'Avalon e Polarium', 'Avalon, Polarium', etc.
     """
     if not broker_raw:
         return []
 
     b = broker_raw.strip().lower()
-
-    # Normaliza separadores comuns para espaço
+    # Normaliza separadores
     for sep in [" e ", ",", ";", "|", "/"]:
         b = b.replace(sep, " ")
 
     parts = [p for p in b.split() if p]
-    normalized = set()
-
-    # Matching flexível
+    out = set()
     for p in parts:
         if p.startswith("avalon"):
-            normalized.add("avalon")
+            out.add("avalon")
         if p.startswith("polarium"):
-            normalized.add("polarium")
+            out.add("polarium")
 
-    # Strings conhecidas
-    if broker_raw.strip().lower() in ["avalon e polarium", "polarium e avalon"]:
-        normalized.update(["avalon", "polarium"])
-
-    # Caso contenha as duas palavras em qualquer ordem
+    # Frases conhecidas
     if "avalon" in b and "polarium" in b:
-        normalized.update(["avalon", "polarium"])
+        out.update(["avalon", "polarium"])
+    return list(out)
 
-    return list(normalized)
+async def _tg_send(bot: Bot | None, chat_id: str | int | None, text: str) -> None:
+    """Envia mensagem com PTB; loga erros e não interrompe a request."""
+    if bot is None or chat_id is None:
+        logger.error("[Telegram] Bot ou chat_id não configurados.")
+        return
+    try:
+        await bot.send_message(
+            chat_id=chat_id,
+            text=text,
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True,
+        )
+    except TelegramError as e:
+        # Erros comuns:
+        # - Chat not found: bot não foi adicionado ao canal, ID errado ou bot diferente do canal
+        # - Forbidden: bot não é admin ou não tem permissão para postar
+        logger.error(f"[Telegram] Falha ao enviar: {e!s}")
 
-def _send_open_to_brokers(open_data: trade_order_info_schema.OpenTradeOffer):
-    """
-    Monta e envia a mensagem de 'abertura' de trade para os brokers selecionados.
-    """
-    msg = (
+# Mensagens
+def _msg_open(open_data: trade_order_info_schema.OpenTradeOffer) -> str:
+    return (
         "🚀 <b>NOVA ENTRADA</b>\n"
         f"• Par: <b>{open_data.trade_pair}</b>\n"
         f"• Timeframe: <b>{open_data.timeframe}</b>\n"
         f"• Direção: <b>{open_data.direction}</b>"
     )
 
-    brokers = _resolve_brokers(open_data.broker)
-    if not brokers:
-        logger.warning(f"[Telegram] Nenhum broker válido em '{open_data.broker}'")
-        return
-
-    for b in brokers:
-        cfg = TELEGRAM_CONFIG.get(b)
-        if not cfg or not cfg.get("token") or not cfg.get("channel"):
-            logger.error(f"[Telegram] Config ausente/inválida para broker '{b}'.")
-            continue
-        _send_telegram_message(cfg["token"], cfg["channel"], msg)
-
-def _send_close_to_brokers(close_data: trade_order_info_schema.CloseTradeOffer):
-    """
-    Monta e envia a mensagem de 'resultado' de trade para os brokers selecionados.
-    """
+def _msg_close(close_data: trade_order_info_schema.CloseTradeOffer) -> str:
     result_clean = str(close_data.result).strip()
     emoji = "✅" if result_clean.upper() == "WIN" else "❌"
-    msg = f"{emoji} <b>RESULTADO</b>: <b>{result_clean}</b>"
+    return f"{emoji} <b>RESULTADO</b>: <b>{result_clean}</b>"
 
-    brokers = _resolve_brokers(close_data.broker)
-    if not brokers:
-        logger.warning(f"[Telegram] Nenhum broker válido em '{close_data.broker}'")
-        return
+# ======================
+# Endpoints CRUD
+# ======================
 
-    for b in brokers:
-        cfg = TELEGRAM_CONFIG.get(b)
-        if not cfg or not cfg.get("token") or not cfg.get("channel"):
-            logger.error(f"[Telegram] Config ausente/inválida para broker '{b}'.")
-            continue
-        _send_telegram_message(cfg["token"], cfg["channel"], msg)
-
-# -------------------------------------------------------
-# Endpoints existentes (CRUD)
-# -------------------------------------------------------
 @trade_order_info_router.post("", response_model=trade_order_info_schema.TradeOrderInfo)
 def create_trade_order_info(
     trade_order_info: trade_order_info_schema.TradeOrderInfoCreate,
@@ -182,11 +156,6 @@ def get_trade_order_infos_by_user_and_brokerage(
     """
     Get all trade orders for the current user and brokerage with pagination.
 
-    Args:
-        brokerage_id: Brokerage ID
-        skip: Number of records to skip
-        limit: Maximum number of records to return
-
     Requires JWT authentication.
     """
     try:
@@ -216,9 +185,6 @@ def get_trade_order_info_by_user_id_today(
 ):
     """
     Get all trade orders for the current user for today.
-
-    Args:
-        brokerage_id: ID of the brokerage
 
     Requires JWT authentication.
     """
@@ -251,10 +217,6 @@ def get_trade_order_infos_by_user(
     """
     Get all trade orders for the current user with pagination.
 
-    Args:
-        skip: Number of records to skip
-        limit: Maximum number of records to return
-
     Requires JWT authentication.
     """
     try:
@@ -286,19 +248,14 @@ def update_trade_order_info(
     """
     Update an existing trade order.
 
-    Args:
-        order_id: ID of the order to update
-
     Requires basic authentication.
     """
     try:
-        # Garante que o ID do path é o mesmo do corpo
         if order_id != trade_order_info.order_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="ID da ordem na URL não corresponde ao ID no corpo da requisição",
             )
-
         return trade_order_info_crud.update_trade_order_info_by_id(db, trade_order_info)
     except HTTPException:
         raise
@@ -309,26 +266,34 @@ def update_trade_order_info(
             detail="Erro ao atualizar informação de ordem de negociação",
         )
 
-# -------------------------------------------------------
-# Endpoints de integração com Telegram
-# -------------------------------------------------------
+# ======================
+# Endpoints Telegram
+# ======================
+
 @trade_order_info_router.post("/open", response_model=str)
-def open_trade_offer(
+async def open_trade_offer(
     open_trade_offer: trade_order_info_schema.OpenTradeOffer,
     db: Session = Depends(get_db),
     current_user: schemas_token.Token = Depends(security.get_current_user),
 ):
     """
-    Open a new trade offer.
-
-    Args:
-        open_trade_offer: The trade offer details
-
-    Requires JWT authentication.
+    Open a new trade offer and notify Telegram channels according to 'broker'.
     """
+    logger.info(f"[OPEN] Recebido: {open_trade_offer}")
     try:
-        logger.info(f"[OPEN] Recebido: {open_trade_offer}")
-        _send_open_to_brokers(open_trade_offer)
+        brokers = _resolve_brokers(open_trade_offer.broker)
+        if not brokers:
+            logger.warning(f"[OPEN] Broker inválido: '{open_trade_offer.broker}'")
+            return Response(content="ok", status_code=status.HTTP_201_CREATED)
+
+        text = _msg_open(open_trade_offer)
+
+        # Envia para cada broker resolvido
+        for b in brokers:
+            bot = BOT_MAP.get(b)
+            chat_id = _parse_chat_id(CHANNEL_MAP.get(b))
+            await _tg_send(bot, chat_id, text)
+
         return Response(content="ok", status_code=status.HTTP_201_CREATED)
     except HTTPException:
         raise
@@ -340,22 +305,28 @@ def open_trade_offer(
         )
 
 @trade_order_info_router.post("/close", response_model=str)
-def close_trade_offer(
+async def close_trade_offer(
     close_trade_offer: trade_order_info_schema.CloseTradeOffer,
     db: Session = Depends(get_db),
     current_user: schemas_token.Token = Depends(security.get_current_user),
 ):
     """
-    Close an existing trade offer.
-
-    Args:
-        close_trade_offer: The trade offer details
-
-    Requires JWT authentication.
+    Close an existing trade offer and notify Telegram channels according to 'broker'.
     """
+    logger.info(f"[CLOSE] Recebido: {close_trade_offer}")
     try:
-        logger.info(f"[CLOSE] Recebido: {close_trade_offer}")
-        _send_close_to_brokers(close_trade_offer)
+        brokers = _resolve_brokers(close_trade_offer.broker)
+        if not brokers:
+            logger.warning(f"[CLOSE] Broker inválido: '{close_trade_offer.broker}'")
+            return Response(content="ok", status_code=status.HTTP_201_CREATED)
+
+        text = _msg_close(close_trade_offer)
+
+        for b in brokers:
+            bot = BOT_MAP.get(b)
+            chat_id = _parse_chat_id(CHANNEL_MAP.get(b))
+            await _tg_send(bot, chat_id, text)
+
         return Response(content="ok", status_code=status.HTTP_201_CREATED)
     except HTTPException:
         raise
