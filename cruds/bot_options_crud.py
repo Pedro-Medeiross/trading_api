@@ -98,7 +98,8 @@ def create_bot_options(db: Session, bot_options: schemas_bot_options.BotOptionsC
             gale_two=bot_options.gale_two,
             brokerage_id=bot_options.brokerage_id,
             gale_one_value=bot_options.gale_one_value,
-            gale_two_value=bot_options.gale_two_value
+            gale_two_value=bot_options.gale_two_value,
+            is_auto=bot_options.is_auto
         )
 
         # Add to database and commit

@@ -16,6 +16,7 @@ class BotOptionsBase(BaseModel):
     brokerage_id: Optional[int] = Field(None, description="ID of the brokerage used by this bot")
     gale_one_value: Optional[float] = Field(None, description="Value for first gale")
     gale_two_value: Optional[float] = Field(None, description="Value for second gale")
+    is_auto: Optional[bool] = Field(None, description="Whether the bot operates automatically")
 
 
 class BotOptionsCreate(BotOptionsBase):
@@ -37,6 +38,7 @@ class BotOptionsUpdate(BaseModel):
     brokerage_id: Optional[int] = Field(None, description="ID of the brokerage used by this bot")
     gale_one_value: Optional[float] = Field(None, description="Value for first gale")
     gale_two_value: Optional[float] = Field(None, description="Value for second gale")
+    is_auto: Optional[bool] = Field(None, description="Whether the bot operates automatically")
 
 
 class BotOptions(BotOptionsBase):
