@@ -1,4 +1,8 @@
 import logging
+import os
+import base64
+import aiohttp
+from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from schemas import brokerages as schemas_brokerages
 from schemas import user as schemas_user
@@ -11,6 +15,58 @@ from cruds import brokerages_crud as crud_brokerages
 logger = logging.getLogger(__name__)
 
 brokerages_router = APIRouter()
+
+HB_LOGIN_URL  = "https://bot-account-manager-api.homebroker.com/v3/login"
+HB_WALLET_URL = "https://bot-wallet-api.homebroker.com/balance/"
+
+# >>> credenciais do APP via ambiente (OBRIGATÓRIO)
+APP_LOGIN    = os.getenv("HB_APP_LOGIN")
+APP_PASSWORD = os.getenv("HB_APP_PASSWORD")
+
+
+def _require_app_creds():
+    if not APP_LOGIN or not APP_PASSWORD:
+        raise RuntimeError("As credenciais HB_APP_LOGIN / HB_APP_PASSWORD não foram definidas no .env")
+
+def _basic_header(login: str, password: str) -> str:
+    token = base64.b64encode(f"{login}:{password}".encode()).decode()
+    return f"Basic {token}"
+
+async def hb_login(session: aiohttp.ClientSession, username: str, password: str) -> str:
+    """
+    Faz login no HomeBroker usando Basic do APP + credenciais do usuário.
+    Retorna access_token.
+    """
+    _require_app_creds()
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": _basic_header(APP_LOGIN, APP_PASSWORD),
+    }
+    payload = {"username": username, "password": password, "role": "hbb"}
+
+    async with session.post(HB_LOGIN_URL, json=payload, headers=headers) as resp:
+        if resp.status != 200:
+            text = await resp.text()
+            raise HTTPException(status_code=resp.status, detail=text)
+        data = await resp.json()
+        token = data.get("access_token") or data.get("accessToken")
+        if not token:
+            raise HTTPException(status_code=500, detail="Token não encontrado na resposta")
+        return token
+
+async def hb_get_balance(
+    session: aiohttp.ClientSession,
+    access_token: str,
+    account_type: Literal["demo", "real"] = "demo",
+) -> Optional[int]:
+    headers = {"Authorization": f"Bearer {access_token}"}
+    async with session.get(HB_WALLET_URL, headers=headers) as resp:
+        if resp.status != 200:
+            text = await resp.text()
+            raise HTTPException(status_code=resp.status, detail=text)
+        data = await resp.json()
+        wallet = data.get(account_type) or {}
+        return wallet.get("balance")
 
 
 @brokerages_router.get("", response_model=list[schemas_brokerages.Brokerages])
@@ -220,3 +276,25 @@ def get_brokerages_by_user_id(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao buscar corretoras do usuário"
         )
+
+
+# ----------------- ROTAS -----------------
+
+@brokerages_router.post("/login")
+async def login(user_email: str, user_password: str):
+    """
+    Faz login no broker e retorna o access_token
+    """
+    async with aiohttp.ClientSession() as session:
+        token = await hb_login(session, user_email, user_password)
+        return {"access_token": token}
+
+@brokerages_router.get("/balance")
+async def get_balance(user_email: str, user_password: str, account_type: Literal["demo","real"]="demo"):
+    """
+    Faz login e retorna apenas o saldo da conta demo ou real
+    """
+    async with aiohttp.ClientSession() as session:
+        token = await hb_login(session, user_email, user_password)
+        balance = await hb_get_balance(session, token, account_type)
+        return {"account_type": account_type, "balance": balance}
